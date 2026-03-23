@@ -12,10 +12,11 @@ export function VoteBar({ partyVotes, totalFor, totalAgainst }: Props) {
 
   const forParties = partyVotes.filter((p) => p.for > 0).sort((a, b) => b.for - a.for)
   const againstParties = partyVotes.filter((p) => p.against > 0).sort((a, b) => b.against - a.against)
+  const forPct = Math.round((totalFor / total) * 100)
 
   return (
     <div className="w-full">
-      <div className="flex h-3 w-full overflow-hidden rounded">
+      <div className="flex h-6 w-full overflow-hidden rounded" style={{ gap: "2px" }}>
         {forParties.map((p) => (
           <div
             key={`for-${p.party}`}
@@ -27,6 +28,7 @@ export function VoteBar({ partyVotes, totalFor, totalAgainst }: Props) {
             title={`${p.party}: ${p.for} for`}
           />
         ))}
+        <div className="h-full w-px bg-background" />
         {againstParties.map((p) => (
           <div
             key={`against-${p.party}`}
@@ -39,9 +41,9 @@ export function VoteBar({ partyVotes, totalFor, totalAgainst }: Props) {
           />
         ))}
       </div>
-      <div className="mt-1.5 flex justify-between font-mono text-xs tabular-nums text-muted-foreground">
-        <span>For: {totalFor}</span>
-        <span>Imod: {totalAgainst}</span>
+      <div className="mt-2 flex justify-between font-mono text-xs tabular-nums text-muted-foreground">
+        <span>For: {totalFor} ({forPct}%)</span>
+        <span>Imod: {totalAgainst} ({100 - forPct}%)</span>
       </div>
     </div>
   )

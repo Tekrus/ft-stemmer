@@ -24,8 +24,8 @@ export default async function DashboardPage() {
         </Link>
       </header>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Seneste afstemninger</h2>
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium text-muted-foreground">Seneste afstemninger</h2>
         {votes.map((vote) => (
           <VoteCard key={vote.id} vote={vote} />
         ))}
@@ -33,7 +33,7 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-10 border-t pt-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Partier</h2>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Partier</h2>
         <div className="flex flex-wrap gap-1.5">
           {Object.entries(PARTY_MAP).map(([abbr, { name, color }]) => (
             <Link

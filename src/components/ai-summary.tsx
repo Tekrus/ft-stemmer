@@ -1,5 +1,4 @@
 import { getOrGenerateSummary } from "@/lib/ai/summarizer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { VoteTotals } from "@/types/vote"
 
 type Props = {
@@ -18,14 +17,12 @@ export async function AISummary(props: Props) {
   if (!summary) return null
 
   return (
-    <Card className="border-l-2 border-l-blue-400 bg-transparent dark:border-l-blue-500">
-      <CardHeader className="px-4 py-3 pb-1">
-        <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">AI Opsummering</CardTitle>
-      </CardHeader>
-      <CardContent className="px-4 pb-3">
+    <section>
+      <h2 className="mb-3 text-sm font-medium text-muted-foreground">AI Opsummering</h2>
+      <div className="rounded border border-blue-200 bg-blue-50/40 p-4 dark:border-blue-900/50 dark:bg-blue-950/20">
         <p className="text-sm leading-relaxed">{summary}</p>
-        <p className="mt-2 text-xs text-muted-foreground">Genereret af AI &mdash; kan indeholde fejl</p>
-      </CardContent>
-    </Card>
+        <p className="mt-3 text-xs text-muted-foreground">Genereret af AI — kan indeholde fejl</p>
+      </div>
+    </section>
   )
 }

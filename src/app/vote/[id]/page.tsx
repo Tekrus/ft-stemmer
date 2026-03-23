@@ -8,7 +8,6 @@ import { AFSTEMNINGSTYPE_MAP } from "@/lib/oda/constants"
 import { VoteStatusBadge } from "@/components/vote-status-badge"
 import { VoteBar } from "@/components/vote-bar"
 import { PartyTable } from "@/components/party-table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { OdaAfstemning } from "@/lib/oda/types"
 
@@ -39,17 +38,17 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <Link href="/" className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
+      <Link href="/" className="mb-6 inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
         ← Tilbage
       </Link>
 
-      <header className="mb-6">
+      <header className="mb-8">
         <div className="flex items-center gap-3">
           <span className="font-mono text-sm tabular-nums text-muted-foreground">{vote.number}</span>
           <VoteStatusBadge passed={vote.passed} />
         </div>
-        <h1 className="mt-2 text-xl font-semibold tracking-[-0.025em]">{vote.title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <h1 className="mt-2 text-xl font-semibold tracking-[-0.02em] leading-snug">{vote.title}</h1>
+        <p className="mt-1.5 text-sm text-muted-foreground">
           {new Date(vote.date).toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" })}
           {" · "}
           {vote.type}
@@ -57,9 +56,9 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
         </p>
       </header>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {sag && (
-          <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+          <Suspense fallback={<Skeleton className="h-24 w-full rounded" />}>
             <AISummary
               sagId={sag.id}
               titel={vote.title}
@@ -74,18 +73,16 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
         )}
 
         {vote.resume && (
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Resume fra Folketinget</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <section>
+            <h2 className="mb-3 text-sm font-medium text-muted-foreground">Resume fra Folketinget</h2>
+            <div className="rounded border border-border bg-card p-4">
               <p className="text-sm leading-relaxed whitespace-pre-line">{vote.resume}</p>
-            </CardContent>
-          </Card>
+            </div>
+          </section>
         )}
 
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Resultat</h2>
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Resultat</h2>
           <VoteBar
             partyVotes={vote.partyVotes}
             totalFor={vote.totals.for}
@@ -94,13 +91,17 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
         </section>
 
         <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Partier</h2>
-          <PartyTable partyVotes={vote.partyVotes} />
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Partier</h2>
+          <div className="rounded border border-border overflow-hidden">
+            <PartyTable partyVotes={vote.partyVotes} />
+          </div>
         </section>
 
-        <section>
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Konklusion</h2>
-          <p className="text-sm whitespace-pre-line text-muted-foreground">{vote.conclusion}</p>
+        <section className="pb-8">
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Konklusion</h2>
+          <div className="rounded border border-border bg-card p-4">
+            <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{vote.conclusion}</p>
+          </div>
         </section>
       </div>
     </div>

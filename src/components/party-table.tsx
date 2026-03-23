@@ -7,38 +7,42 @@ type Props = {
 }
 
 export function PartyTable({ partyVotes }: Props) {
-  const forParties = partyVotes.filter((p) => p.for > 0).sort((a, b) => b.for - a.for)
-  const againstParties = partyVotes.filter((p) => p.against > 0).sort((a, b) => b.against - a.against)
-  const sorted = [...forParties, ...againstParties.filter((p) => !forParties.includes(p))]
+  const sorted = [...partyVotes].sort((a, b) => b.for - a.for || a.against - b.against)
 
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Parti</TableHead>
-          <TableHead className="text-right">For</TableHead>
-          <TableHead className="text-right">Imod</TableHead>
-          <TableHead className="text-right">Frav&aelig;r</TableHead>
-          <TableHead className="text-right">Hv. for/imod</TableHead>
+          <TableHead className="w-[200px]">Parti</TableHead>
+          <TableHead className="text-right w-16">For</TableHead>
+          <TableHead className="text-right w-16">Imod</TableHead>
+          <TableHead className="text-right w-16">Fravær</TableHead>
+          <TableHead className="text-right w-20">Hv. for/imod</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sorted.map((p) => {
-          const isFor = p.for > p.against
-          const borderColor = isFor ? "rgb(22 163 74)" : "rgb(220 38 38)"
-          return (
-            <TableRow key={p.party} className="border-l-2" style={{ borderLeftColor: borderColor }}>
-              <TableCell className="py-2">
+        {sorted.map((p) => (
+          <TableRow key={p.party}>
+            <TableCell className="py-2.5">
+              <div className="flex items-center gap-2">
                 <PartyBadge abbreviation={p.party} color={p.color} />
-                <span className="ml-2 text-xs text-muted-foreground">{p.partyName}</span>
-              </TableCell>
-              <TableCell className="py-2 text-right font-mono tabular-nums font-medium">{p.for || "\u2014"}</TableCell>
-              <TableCell className="py-2 text-right font-mono tabular-nums font-medium">{p.against || "\u2014"}</TableCell>
-              <TableCell className="py-2 text-right font-mono tabular-nums">{p.absent || "\u2014"}</TableCell>
-              <TableCell className="py-2 text-right font-mono tabular-nums">{p.abstained || "\u2014"}</TableCell>
-            </TableRow>
-          )
-        })}
+                <span className="text-xs text-muted-foreground">{p.partyName}</span>
+              </div>
+            </TableCell>
+            <TableCell className="text-right py-2.5 font-mono tabular-nums text-sm">
+              {p.for > 0 ? <span className="text-green-700 dark:text-green-400 font-medium">{p.for}</span> : "—"}
+            </TableCell>
+            <TableCell className="text-right py-2.5 font-mono tabular-nums text-sm">
+              {p.against > 0 ? <span className="text-red-700 dark:text-red-400 font-medium">{p.against}</span> : "—"}
+            </TableCell>
+            <TableCell className="text-right py-2.5 font-mono tabular-nums text-sm text-muted-foreground">
+              {p.absent > 0 ? p.absent : "—"}
+            </TableCell>
+            <TableCell className="text-right py-2.5 font-mono tabular-nums text-sm text-muted-foreground">
+              {p.abstained > 0 ? p.abstained : "—"}
+            </TableCell>
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   )
