@@ -12,6 +12,7 @@ export const PARTY_MAP: Readonly<Record<string, { name: string; color: string }>
   DF:  { name: "Dansk Folkeparti", color: "#e4ae00" },
   RV:  { name: "Radikale Venstre", color: "#733280" },
   ALT: { name: "Alternativet", color: "#2b8738" },
+  BP:  { name: "Borgerlisten", color: "#0a4a7a" },
 }
 
 const FALLBACK_COLOR = "#6b7280"

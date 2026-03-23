@@ -68,7 +68,18 @@ export async function fetchSag(id: number) {
 }
 
 export async function fetchStemmer(afstemningId: number) {
-  return fetchFromOda<{ value: import("./types").OdaStemme[] }>(
-    `/Stemme?$filter=afstemningid eq ${afstemningId}&$expand=Akt%C3%B8r`
-  )
+  const pageSize = 100
+  const allStemmer: import("./types").OdaStemme[] = []
+  let skip = 0
+
+  while (true) {
+    const response = await fetchFromOda<{ value: import("./types").OdaStemme[] }>(
+      `/Stemme?$filter=afstemningid eq ${afstemningId}&$expand=Akt%C3%B8r&$top=${pageSize}&$skip=${skip}`
+    )
+    allStemmer.push(...response.value)
+    if (response.value.length < pageSize) break
+    skip += pageSize
+  }
+
+  return { value: allStemmer }
 }
