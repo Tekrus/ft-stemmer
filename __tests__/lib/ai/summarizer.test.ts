@@ -9,8 +9,8 @@ vi.mock("ai", () => ({
   generateText: vi.fn(),
 }))
 
-vi.mock("@ai-sdk/gateway", () => ({
-  gateway: vi.fn((model: string) => model),
+vi.mock("@ai-sdk/google", () => ({
+  google: vi.fn((model: string) => model),
 }))
 
 import { getOrGenerateSummary } from "@/lib/ai/summarizer"
