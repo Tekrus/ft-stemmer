@@ -83,6 +83,7 @@ export async function getOrGenerateSummary(input: SummaryInput): Promise<string 
     return text
   } catch (error) {
     console.error("[AI] Summary generation failed:", error)
-    return null
+    const message = error instanceof Error ? error.message : String(error)
+    return `[AI fejl: ${message}]`
   }
 }
