@@ -1,7 +1,9 @@
 import Link from "next/link"
 import { fetchVoteSummaries } from "@/lib/oda/fetch-votes"
 import { config } from "@/lib/config"
+import { PARTY_MAP } from "@/lib/parties"
 import { VoteCard } from "@/components/vote-card"
+import { PartyBadge } from "@/components/party-badge"
 import { LoadMoreButton } from "@/components/load-more-button"
 
 export const dynamic = "force-dynamic"
@@ -30,12 +32,24 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-12 border-t pt-8">
-        <h2 className="mb-4 text-lg font-semibold">Dyk dybere</h2>
-        <div className="flex gap-3">
-          <Link href="/search" className="rounded-md border border-input px-4 py-2 text-sm hover:bg-muted">
-            Alle lovforslag
-          </Link>
+        <h2 className="mb-4 text-lg font-semibold">Partier</h2>
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(PARTY_MAP).map(([abbr, { name, color }]) => (
+            <Link
+              key={abbr}
+              href={`/party/${abbr.toLowerCase()}`}
+              className="rounded-md border border-input px-3 py-2 text-sm hover:bg-muted transition-colors"
+            >
+              <PartyBadge abbreviation={abbr} color={color} />
+            </Link>
+          ))}
         </div>
+      </section>
+
+      <section className="mt-6">
+        <Link href="/search" className="text-sm text-muted-foreground hover:text-foreground underline">
+          Søg i alle lovforslag →
+        </Link>
       </section>
     </div>
   )
