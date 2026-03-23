@@ -15,6 +15,6 @@ export const config = {
     defaultPageSize: Number(process.env.DEFAULT_PAGE_SIZE ?? 15),
   },
   ai: {
-    model: process.env.AI_MODEL ?? "gemini-3.1-flash-lite",
+    model: process.env.AI_MODEL ?? "gemini-3.1-flash-lite-preview",
   },
 }
