@@ -1,5 +1,4 @@
 import { generateText } from "ai"
-import { gateway } from "@ai-sdk/gateway"
 import { config } from "@/lib/config"
 import { kvGet, kvSet } from "@/lib/kv/client"
 import type { VoteTotals } from "@/types/vote"
@@ -68,7 +67,7 @@ export async function getOrGenerateSummary(input: SummaryInput): Promise<string 
 
   try {
     const { text } = await generateText({
-      model: gateway(config.ai.model),
+      model: config.ai.model,
       system: "Opsummer dette lovforslag i 2-3 sætninger på dansk i et letforståeligt sprog. Forklar hvad det betyder for borgerne. Nævn om forslaget blev vedtaget eller forkastet og med hvilken margin.",
       prompt: buildPrompt(input),
     })
