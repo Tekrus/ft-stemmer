@@ -15,6 +15,8 @@ export const config = {
     defaultPageSize: Number(process.env.DEFAULT_PAGE_SIZE ?? 15),
   },
   ai: {
-    model: process.env.AI_MODEL ?? "gemini-3.1-flash-lite-preview",
+    // Model is selected automatically via fallback chain in summarizer.ts
+    // Override with AI_MODEL env var to force a specific model
+    modelOverride: process.env.AI_MODEL ?? null,
   },
 }

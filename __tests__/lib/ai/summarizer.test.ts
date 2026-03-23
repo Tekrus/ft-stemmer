@@ -31,10 +31,11 @@ describe("getOrGenerateSummary", () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.spyOn(console, "warn").mockImplementation(() => {})
+    vi.spyOn(console, "error").mockImplementation(() => {})
   })
 
   it("returns cached summary when hash matches", async () => {
-    // Pre-computed hash for "This is a test resume" using the implementation's hash function
     const expectedHash = "1lei8dirtfx"
 
     vi.mocked(kvGet).mockResolvedValue({
@@ -58,13 +59,22 @@ describe("getOrGenerateSummary", () => {
     expect(kvSet).toHaveBeenCalled()
   })
 
-  it("returns null on AI failure", async () => {
+  it("falls back to next model when first fails", async () => {
+    vi.mocked(kvGet).mockResolvedValue(null)
+    vi.mocked(generateText)
+      .mockRejectedValueOnce(new Error("Model not found"))
+      .mockResolvedValueOnce({ text: "Fallback summary" } as any)
+
+    const result = await getOrGenerateSummary(input)
+    expect(result).toBe("Fallback summary")
+    expect(generateText).toHaveBeenCalledTimes(2)
+  })
+
+  it("returns null when all models fail", async () => {
     vi.mocked(kvGet).mockResolvedValue(null)
     vi.mocked(generateText).mockRejectedValue(new Error("AI unavailable"))
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {})
 
     const result = await getOrGenerateSummary(input)
     expect(result).toBeNull()
-    consoleSpy.mockRestore()
   })
 })

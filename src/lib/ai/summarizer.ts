@@ -22,6 +22,17 @@ type CachedSummary = {
   readonly createdAt: string
 }
 
+// Ordered by preference: cheapest/highest-limit first
+const MODEL_FALLBACK_CHAIN = [
+  "gemini-3.1-flash-lite-preview",
+  "gemini-2.5-flash-lite",
+  "gemini-2.5-flash",
+  "gemini-3-flash",
+] as const
+
+const SYSTEM_PROMPT =
+  "Opsummer dette lovforslag i 2-3 sætninger på dansk i et letforståeligt sprog. Forklar hvad det betyder for borgerne. Nævn om forslaget blev vedtaget eller forkastet og med hvilken margin."
+
 function hashResume(resume: string): string {
   let h1 = 0xdeadbeef
   let h2 = 0x41c6ce57
@@ -57,6 +68,30 @@ ${outcome}
 Samlet: ${input.totals.for} for, ${input.totals.against} imod, ${input.totals.absent} fravær, ${input.totals.abstained} hverken for eller imod.`
 }
 
+async function generateWithFallback(prompt: string): Promise<{ text: string; model: string }> {
+  const errors: string[] = []
+  const models = config.ai.modelOverride
+    ? [config.ai.modelOverride]
+    : MODEL_FALLBACK_CHAIN
+
+  for (const modelId of models) {
+    try {
+      const { text } = await generateText({
+        model: google(modelId),
+        system: SYSTEM_PROMPT,
+        prompt,
+      })
+      return { text, model: modelId }
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error)
+      console.warn(`[AI] Model ${modelId} failed: ${msg.slice(0, 100)}`)
+      errors.push(`${modelId}: ${msg.slice(0, 80)}`)
+    }
+  }
+
+  throw new Error(`All models failed:\n${errors.join("\n")}`)
+}
+
 export async function getOrGenerateSummary(input: SummaryInput): Promise<string | null> {
   const kvKey = `summary:${input.sagId}`
   const currentHash = hashResume(input.resume)
@@ -67,15 +102,11 @@ export async function getOrGenerateSummary(input: SummaryInput): Promise<string 
   }
 
   try {
-    const { text } = await generateText({
-      model: google(config.ai.model),
-      system: "Opsummer dette lovforslag i 2-3 sætninger på dansk i et letforståeligt sprog. Forklar hvad det betyder for borgerne. Nævn om forslaget blev vedtaget eller forkastet og med hvilken margin.",
-      prompt: buildPrompt(input),
-    })
+    const { text, model } = await generateWithFallback(buildPrompt(input))
 
     await kvSet<CachedSummary>(kvKey, {
       summary: text,
-      model: config.ai.model,
+      model,
       resumeHash: currentHash,
       createdAt: new Date().toISOString(),
     }, 0)
@@ -83,7 +114,6 @@ export async function getOrGenerateSummary(input: SummaryInput): Promise<string 
     return text
   } catch (error) {
     console.error("[AI] Summary generation failed:", error)
-    const message = error instanceof Error ? error.message : String(error)
-    return `[AI fejl: ${message}]`
+    return null
   }
 }
