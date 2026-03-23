@@ -13,32 +13,33 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
+      <div className="mb-8 h-0.5 w-full bg-red-600" aria-hidden="true" />
       <header className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">FT Stemmer</h1>
-          <p className="mt-1 text-muted-foreground">Seneste afstemninger i Folketinget</p>
+          <h1 className="text-2xl font-semibold tracking-[-0.025em]">FT Stemmer</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">Seneste afstemninger i Folketinget</p>
         </div>
-        <Link href="/search" className="rounded-md border border-input px-3 py-2 text-sm hover:bg-muted">
-          Søg
+        <Link href="/search" className="rounded border border-input px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors">
+          Sog
         </Link>
       </header>
 
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Seneste afstemninger</h2>
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Seneste afstemninger</h2>
         {votes.map((vote) => (
           <VoteCard key={vote.id} vote={vote} />
         ))}
         <LoadMoreButton initialCount={votes.length} />
       </section>
 
-      <section className="mt-12 border-t pt-8">
-        <h2 className="mb-4 text-lg font-semibold">Partier</h2>
-        <div className="flex flex-wrap gap-2">
+      <section className="mt-10 border-t pt-6">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Partier</h2>
+        <div className="flex flex-wrap gap-1.5">
           {Object.entries(PARTY_MAP).map(([abbr, { name, color }]) => (
             <Link
               key={abbr}
               href={`/party/${abbr.toLowerCase()}`}
-              className="rounded-md border border-input px-3 py-2 text-sm hover:bg-muted transition-colors"
+              className="rounded border border-input px-2.5 py-1.5 text-xs hover:bg-muted transition-colors"
             >
               <PartyBadge abbreviation={abbr} color={color} />
             </Link>
@@ -47,8 +48,8 @@ export default async function DashboardPage() {
       </section>
 
       <section className="mt-6">
-        <Link href="/search" className="text-sm text-muted-foreground hover:text-foreground underline">
-          Søg i alle lovforslag →
+        <Link href="/search" className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
+          Sog i alle lovforslag
         </Link>
       </section>
     </div>

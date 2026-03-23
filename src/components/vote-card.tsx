@@ -9,22 +9,26 @@ type Props = {
 }
 
 export function VoteCard({ vote }: Props) {
+  const borderColor = vote.passed ? "rgb(22 163 74)" : "rgb(220 38 38)"
   return (
     <Link href={`/vote/${vote.id}`}>
-      <Card className="transition-colors hover:bg-muted/50">
-        <CardHeader className="pb-2">
+      <Card
+        className="transition-colors hover:bg-muted/30 border-l-2"
+        style={{ borderLeftColor: borderColor }}
+      >
+        <CardHeader className="px-4 py-3 pb-1.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm text-muted-foreground">{vote.number}</span>
+              <span className="font-mono text-xs tabular-nums text-muted-foreground">{vote.number}</span>
               <VoteStatusBadge passed={vote.passed} />
             </div>
-            <time className="text-sm text-muted-foreground">
+            <time className="text-xs text-muted-foreground tabular-nums">
               {new Date(vote.date).toLocaleDateString("da-DK", { day: "numeric", month: "short", year: "numeric" })}
             </time>
           </div>
-          <CardTitle className="text-base leading-snug">{vote.shortTitle || vote.title}</CardTitle>
+          <CardTitle className="text-sm font-medium leading-snug tracking-[-0.01em]">{vote.shortTitle || vote.title}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-3 pt-0">
           <PartyVoteGroups partyVotes={vote.partyVotes} />
         </CardContent>
       </Card>

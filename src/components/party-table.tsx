@@ -25,17 +25,17 @@ export function PartyTable({ partyVotes }: Props) {
       <TableBody>
         {sorted.map((p) => {
           const isFor = p.for > p.against
-          const bgClass = isFor ? "bg-green-50 dark:bg-green-950/20" : "bg-red-50 dark:bg-red-950/20"
+          const borderColor = isFor ? "rgb(22 163 74)" : "rgb(220 38 38)"
           return (
-            <TableRow key={p.party} className={bgClass}>
-              <TableCell>
+            <TableRow key={p.party} className="border-l-2" style={{ borderLeftColor: borderColor }}>
+              <TableCell className="py-2">
                 <PartyBadge abbreviation={p.party} color={p.color} />
-                <span className="ml-2 text-sm text-muted-foreground">{p.partyName}</span>
+                <span className="ml-2 text-xs text-muted-foreground">{p.partyName}</span>
               </TableCell>
-              <TableCell className="text-right font-medium">{p.for || "\u2014"}</TableCell>
-              <TableCell className="text-right font-medium">{p.against || "\u2014"}</TableCell>
-              <TableCell className="text-right">{p.absent || "\u2014"}</TableCell>
-              <TableCell className="text-right">{p.abstained || "\u2014"}</TableCell>
+              <TableCell className="py-2 text-right font-mono tabular-nums font-medium">{p.for || "\u2014"}</TableCell>
+              <TableCell className="py-2 text-right font-mono tabular-nums font-medium">{p.against || "\u2014"}</TableCell>
+              <TableCell className="py-2 text-right font-mono tabular-nums">{p.absent || "\u2014"}</TableCell>
+              <TableCell className="py-2 text-right font-mono tabular-nums">{p.abstained || "\u2014"}</TableCell>
             </TableRow>
           )
         })}

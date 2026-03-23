@@ -16,8 +16,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="da">
-      <body className={inter.className}>
-        <main className="min-h-screen bg-background">
+      <body className={`${inter.className} antialiased`}>
+        <main className="min-h-screen bg-background" style={{ fontVariantNumeric: "tabular-nums" }}>
           {children}
         </main>
       </body>

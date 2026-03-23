@@ -15,11 +15,11 @@ export function PartyVoteList({ votes, partyAbbr }: Props) {
 
   return (
     <Tabs defaultValue="passed">
-      <TabsList className="w-full">
-        <TabsTrigger value="passed" className="flex-1">
+      <TabsList variant="line" className="w-full border-b border-border">
+        <TabsTrigger value="passed" className="flex-1 text-xs font-medium uppercase tracking-wide">
           Vedtaget ({passedTotal})
         </TabsTrigger>
-        <TabsTrigger value="rejected" className="flex-1">
+        <TabsTrigger value="rejected" className="flex-1 text-xs font-medium uppercase tracking-wide">
           Forkastet ({rejectedTotal})
         </TabsTrigger>
       </TabsList>

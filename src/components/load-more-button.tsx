@@ -36,7 +36,7 @@ export function LoadMoreButton({ initialCount }: Props) {
         <button
           onClick={handleLoadMore}
           disabled={isPending}
-          className="mt-4 w-full rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50"
+          className="mt-4 w-full py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline underline-offset-2 disabled:opacity-50"
         >
           {isPending ? "Henter..." : "Vis flere"}
         </button>

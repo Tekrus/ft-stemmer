@@ -25,7 +25,7 @@ export default async function PartyPage({ params }: { params: Promise<{ abbrevia
       <header className="mb-8">
         <div className="flex items-center gap-3">
           <PartyBadge abbreviation={partyInfo.abbreviation} color={partyInfo.color} />
-          <h1 className="text-2xl font-bold tracking-tight">{partyInfo.name}</h1>
+          <h1 className="text-xl font-semibold tracking-[-0.025em]">{partyInfo.name}</h1>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           Seneste afstemninger for {partyInfo.name}

@@ -15,7 +15,7 @@ export function VoteBar({ partyVotes, totalFor, totalAgainst }: Props) {
 
   return (
     <div className="w-full">
-      <div className="flex h-8 w-full overflow-hidden rounded-md">
+      <div className="flex h-3 w-full overflow-hidden rounded">
         {forParties.map((p) => (
           <div
             key={`for-${p.party}`}
@@ -30,7 +30,7 @@ export function VoteBar({ partyVotes, totalFor, totalAgainst }: Props) {
         {againstParties.map((p) => (
           <div
             key={`against-${p.party}`}
-            className="h-full opacity-60 transition-all"
+            className="h-full opacity-50 transition-all"
             style={{
               width: `${(p.against / total) * 100}%`,
               backgroundColor: p.color,
@@ -39,7 +39,7 @@ export function VoteBar({ partyVotes, totalFor, totalAgainst }: Props) {
           />
         ))}
       </div>
-      <div className="mt-1 flex justify-between text-sm text-muted-foreground">
+      <div className="mt-1.5 flex justify-between font-mono text-xs tabular-nums text-muted-foreground">
         <span>For: {totalFor}</span>
         <span>Imod: {totalAgainst}</span>
       </div>

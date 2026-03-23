@@ -45,10 +45,10 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
 
       <header className="mb-6">
         <div className="flex items-center gap-3">
-          <span className="font-mono text-lg text-muted-foreground">{vote.number}</span>
+          <span className="font-mono text-sm tabular-nums text-muted-foreground">{vote.number}</span>
           <VoteStatusBadge passed={vote.passed} />
         </div>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight">{vote.title}</h1>
+        <h1 className="mt-2 text-xl font-semibold tracking-[-0.025em]">{vote.title}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {new Date(vote.date).toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" })}
           {" · "}
@@ -85,7 +85,7 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
         )}
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Resultat</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Resultat</h2>
           <VoteBar
             partyVotes={vote.partyVotes}
             totalFor={vote.totals.for}
@@ -94,12 +94,12 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Partier</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Partier</h2>
           <PartyTable partyVotes={vote.partyVotes} />
         </section>
 
         <section>
-          <h2 className="mb-3 text-lg font-semibold">Konklusion</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Konklusion</h2>
           <p className="text-sm whitespace-pre-line text-muted-foreground">{vote.conclusion}</p>
         </section>
       </div>
