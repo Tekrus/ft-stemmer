@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { OdaAfstemning } from "@/lib/oda/types"
 
-export const revalidate = 3600
+export const dynamic = "force-dynamic"
 
 export default async function VoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

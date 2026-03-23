@@ -4,7 +4,7 @@ import { config } from "@/lib/config"
 import { VoteCard } from "@/components/vote-card"
 import { LoadMoreButton } from "@/components/load-more-button"
 
-export const revalidate = 1800
+export const dynamic = "force-dynamic"
 
 export default async function DashboardPage() {
   const votes = await fetchVoteSummaries(config.pagination.defaultPageSize)
