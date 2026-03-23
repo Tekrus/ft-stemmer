@@ -1,7 +1,7 @@
 export const config = {
   oda: {
     baseUrl: process.env.ODA_BASE_URL ?? "https://oda.ft.dk/api",
-    requestDelayMs: Number(process.env.ODA_REQUEST_DELAY_MS ?? 100),
+    requestDelayMs: Number(process.env.ODA_REQUEST_DELAY_MS ?? 50),
   },
   revalidate: {
     dashboard: Number(process.env.REVALIDATE_DASHBOARD ?? 1800),
