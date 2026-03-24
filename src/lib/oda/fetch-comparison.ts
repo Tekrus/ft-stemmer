@@ -27,9 +27,10 @@ function getStance(vote: VoteSummary, partyAbbr: string): PartyStance | null {
 export async function fetchComparisonVotes(
   partyA: string,
   partyB: string,
-  count = 50
+  count = 50,
+  skip = 0
 ): Promise<ComparisonResult> {
-  const votes = await fetchVoteSummaries(count)
+  const votes = await fetchVoteSummaries(count, skip)
 
   const disagreements = votes.flatMap((vote) => {
     const stanceA = getStance(vote, partyA)
