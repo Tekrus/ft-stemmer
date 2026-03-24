@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useState, useCallback, useTransition } from "react"
 import { PARTY_MAP } from "@/lib/parties"
 import { PartyBadge } from "./party-badge"
+import { ComparisonSkeleton } from "@/app/compare/loading"
 
 type Props = {
   readonly selectedA: string | null
@@ -16,7 +17,7 @@ export function PartySelector({ selectedA, selectedB }: Props) {
   const router = useRouter()
   const [localA, setLocalA] = useState(selectedA)
   const [localB, setLocalB] = useState(selectedB)
-  const [, startTransition] = useTransition()
+  const [isPending, startTransition] = useTransition()
 
   const updateSelection = useCallback(
     (key: "a" | "b", value: string) => {
@@ -37,6 +38,8 @@ export function PartySelector({ selectedA, selectedB }: Props) {
     [router, localA, localB]
   )
 
+  const bothSelected = localA !== null && localB !== null && localA !== localB
+
   return (
     <div className="space-y-4">
       <SelectorRow
@@ -51,6 +54,11 @@ export function PartySelector({ selectedA, selectedB }: Props) {
         excludedAbbr={localA}
         onSelect={(abbr) => updateSelection("b", abbr)}
       />
+      {isPending && bothSelected && (
+        <div className="mt-2">
+          <ComparisonSkeleton />
+        </div>
+      )}
     </div>
   )
 }
