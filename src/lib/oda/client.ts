@@ -69,7 +69,7 @@ export async function fetchSag(id: number) {
 }
 
 export async function fetchStemmer(afstemningId: number) {
-  const pageSize = 200
+  const pageSize = 100
   const allStemmer: import("./types").OdaStemme[] = []
   let skip = 0
 
