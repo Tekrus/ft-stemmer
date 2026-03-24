@@ -3,20 +3,14 @@ export const config = {
     baseUrl: process.env.ODA_BASE_URL ?? "https://oda.ft.dk/api",
     requestDelayMs: Number(process.env.ODA_REQUEST_DELAY_MS ?? 50),
   },
-  revalidate: {
-    dashboard: Number(process.env.REVALIDATE_DASHBOARD ?? 1800),
-    voteDetail: Number(process.env.REVALIDATE_VOTE_DETAIL ?? 3600),
-  },
   cache: {
-    odaTtl: Number(process.env.ODA_CACHE_TTL ?? 1800),
-    odaTtlHistorical: Number(process.env.ODA_CACHE_TTL_HISTORICAL ?? 86400),
+    /** TTL for list/search queries (seconds). Individual records use TTL 0 (permanent). */
+    odaTtlList: Number(process.env.ODA_CACHE_TTL ?? 10800),
   },
   pagination: {
     defaultPageSize: Number(process.env.DEFAULT_PAGE_SIZE ?? 15),
   },
   ai: {
-    // Model is selected automatically via fallback chain in summarizer.ts
-    // Override with AI_MODEL env var to force a specific model
     modelOverride: process.env.AI_MODEL ?? null,
   },
 }
