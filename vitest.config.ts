@@ -9,6 +9,7 @@ export default defineConfig({
     setupFiles: [],
     include: ["__tests__/**/*.test.{ts,tsx}"],
     passWithNoTests: true,
+    clearMocks: true,
   },
   resolve: {
     alias: {
