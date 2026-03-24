@@ -8,6 +8,7 @@ export type OdaAfstemning = {
   readonly typeid: number
   readonly sagstrinid: number | null
   readonly opdateringsdato: string
+  readonly Sagstrin?: OdaSagstrin & { readonly Sag?: OdaSag }
 }
 
 export type OdaSagstrin = {

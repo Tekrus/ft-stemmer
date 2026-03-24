@@ -1,4 +1,4 @@
-import { fetchFromOda, fetchSagstrin, fetchSag, fetchStemmerRaw, fetchPeriode } from "./client"
+import { fetchFromOda, fetchStemmerRaw, fetchPeriode } from "./client"
 import { mapToVoteSummary, mapStemmeToPartyVotes } from "./mapper"
 import { AFSTEMNINGSTYPE_MAP } from "./constants"
 import { pMap } from "@/lib/pmap"
@@ -18,7 +18,7 @@ type CachedPartyVotes = {
  * Raw Stemme+Aktør data is NOT cached (too large). Instead we fetch it,
  * process it into PartyVote[], and cache just that (~1-2KB vs ~100KB+).
  */
-async function fetchPartyVotes(afstemningId: number): Promise<CachedPartyVotes> {
+export async function fetchPartyVotes(afstemningId: number): Promise<CachedPartyVotes> {
   const key = `partyvotes:${afstemningId}`
   const cached = await kvGet<CachedPartyVotes>(key)
   if (cached) return cached
@@ -46,19 +46,16 @@ async function getPeriodeKode(periodeid: number): Promise<string | null> {
 }
 
 export async function fetchVoteSummaries(top: number, skip = 0): Promise<VoteSummary[]> {
+  // Single query with $expand fetches Afstemning + Sagstrin + Sag in one request
   const response = await fetchFromOda<OdaResponse<OdaAfstemning>>(
-    `/Afstemning?$top=${top}&$skip=${skip}&$orderby=opdateringsdato desc`
+    `/Afstemning?$top=${top}&$skip=${skip}&$orderby=opdateringsdato desc&$expand=Sagstrin/Sag`
   )
 
   return pMap(
     response.value,
     async (afstemning) => {
-      const sagstrin = afstemning.sagstrinid
-        ? await fetchSagstrin(afstemning.sagstrinid)
-        : null
-      const sag = sagstrin
-        ? await fetchSag(sagstrin.sagid)
-        : null
+      const sagstrin = afstemning.Sagstrin ?? null
+      const sag = sagstrin?.Sag ?? null
       const { partyVotes, totals } = await fetchPartyVotes(afstemning.id)
       const periodeKode = sag ? await getPeriodeKode(sag.periodeid) : null
 
