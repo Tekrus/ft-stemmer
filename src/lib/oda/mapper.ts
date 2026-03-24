@@ -83,11 +83,11 @@ export function mapToVoteSummary(
   afstemning: OdaAfstemning,
   sagstrin: OdaSagstrin | null,
   sag: OdaSag | null,
-  stemmer: readonly OdaStemme[],
+  partyVotes: PartyVote[],
+  totals: VoteTotals,
   afstemningstype: string,
   periodeKode: string | null = null
 ): VoteSummary {
-  const { partyVotes, totals } = mapStemmeToPartyVotes(stemmer)
   return {
     id: afstemning.id,
     number: sag?.nummer ?? "",

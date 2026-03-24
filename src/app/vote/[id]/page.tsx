@@ -1,8 +1,9 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { fetchAfstemning, fetchSagstrin, fetchSag, fetchStemmer, fetchPeriode } from "@/lib/oda/client"
-import { mapToVoteSummary } from "@/lib/oda/mapper"
+import { fetchAfstemning, fetchSagstrin, fetchSag, fetchStemmerRaw, fetchPeriode } from "@/lib/oda/client"
+import { mapToVoteSummary, mapStemmeToPartyVotes } from "@/lib/oda/mapper"
+import { kvGet, kvSet } from "@/lib/kv/client"
 import { AISummary } from "@/components/ai-summary"
 import { AFSTEMNINGSTYPE_MAP } from "@/lib/oda/constants"
 import { VoteStatusBadge } from "@/components/vote-status-badge"
@@ -29,7 +30,15 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
     ? await fetchSagstrin(afstemning.sagstrinid)
     : null
   const sag = sagstrin ? await fetchSag(sagstrin.sagid) : null
-  const stemmerResponse = await fetchStemmer(afstemning.id)
+
+  const pvKey = `partyvotes:${afstemning.id}`
+  let pvCached = await kvGet<{ partyVotes: import("@/types/vote").PartyVote[]; totals: import("@/types/vote").VoteTotals }>(pvKey)
+  if (!pvCached) {
+    const stemmerResponse = await fetchStemmerRaw(afstemning.id)
+    pvCached = mapStemmeToPartyVotes(stemmerResponse.value)
+    await kvSet(pvKey, pvCached, 0)
+  }
+
   let periodeKode: string | null = null
   if (sag) {
     try {
@@ -39,7 +48,7 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
   }
 
   const vote = mapToVoteSummary(
-    afstemning, sagstrin, sag, stemmerResponse.value,
+    afstemning, sagstrin, sag, pvCached.partyVotes, pvCached.totals,
     AFSTEMNINGSTYPE_MAP[afstemning.typeid] ?? "Ukendt",
     periodeKode
   )

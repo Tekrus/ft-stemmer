@@ -75,18 +75,32 @@ export async function fetchPeriode(id: number) {
   )
 }
 
-export async function fetchStemmer(afstemningId: number) {
+/**
+ * Fetch raw Stemme data from ODA. NOT cached in Redis — the raw data with
+ * expanded Aktør biografi is too large (~100KB+ per vote). Callers should
+ * use fetchPartyVotesForAfstemning() instead, which caches the compact result.
+ */
+export async function fetchStemmerRaw(afstemningId: number) {
   const pageSize = 100
   const allStemmer: import("./types").OdaStemme[] = []
   let skip = 0
 
   while (true) {
-    const response = await fetchFromOda<{ value: import("./types").OdaStemme[] }>(
-      `/Stemme?$filter=afstemningid eq ${afstemningId}&$expand=Akt%C3%B8r&$top=${pageSize}&$skip=${skip}`,
-      0
-    )
-    allStemmer.push(...response.value)
-    if (response.value.length < pageSize) break
+    const path = `/Stemme?$filter=afstemningid eq ${afstemningId}&$expand=Akt%C3%B8r&$top=${pageSize}&$skip=${skip}`
+    const url = `${config.oda.baseUrl}${path}&$format=json`
+
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(`ODA API error: ${response.status} for ${path}`)
+    }
+    const data = (await response.json()) as { value: import("./types").OdaStemme[] }
+
+    if (config.oda.requestDelayMs > 0) {
+      await delay(config.oda.requestDelayMs)
+    }
+
+    allStemmer.push(...data.value)
+    if (data.value.length < pageSize) break
     skip += pageSize
   }
 

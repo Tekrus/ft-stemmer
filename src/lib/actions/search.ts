@@ -1,14 +1,26 @@
 "use server"
 
-import { fetchFromOda, fetchStemmer } from "@/lib/oda/client"
-import { mapToVoteSummary } from "@/lib/oda/mapper"
+import { fetchFromOda, fetchStemmerRaw } from "@/lib/oda/client"
+import { mapToVoteSummary, mapStemmeToPartyVotes } from "@/lib/oda/mapper"
 import { AFSTEMNINGSTYPE_MAP } from "@/lib/oda/constants"
+import { kvGet, kvSet } from "@/lib/kv/client"
 import type { OdaAfstemning, OdaResponse, OdaSag, OdaSagstrin } from "@/lib/oda/types"
-import type { VoteSummary } from "@/types/vote"
+import type { PartyVote, VoteSummary, VoteTotals } from "@/types/vote"
 import { config } from "@/lib/config"
 
 function escapeODataString(value: string): string {
   return value.replace(/'/g, "''")
+}
+
+async function getPartyVotes(afstemningId: number): Promise<{ partyVotes: PartyVote[]; totals: VoteTotals }> {
+  const key = `partyvotes:${afstemningId}`
+  const cached = await kvGet<{ partyVotes: PartyVote[]; totals: VoteTotals }>(key)
+  if (cached) return cached
+
+  const stemmerResponse = await fetchStemmerRaw(afstemningId)
+  const result = mapStemmeToPartyVotes(stemmerResponse.value)
+  await kvSet(key, result, 0)
+  return result
 }
 
 export async function searchVotes(query: string, skip = 0): Promise<VoteSummary[]> {
@@ -34,14 +46,15 @@ export async function searchVotes(query: string, skip = 0): Promise<VoteSummary[
     if (afstemningerResponse.value.length === 0) continue
 
     const afstemning = afstemningerResponse.value[0]
-    const stemmerResponse = await fetchStemmer(afstemning.id)
+    const { partyVotes, totals } = await getPartyVotes(afstemning.id)
 
     summaries.push(
       mapToVoteSummary(
         afstemning,
         sagstrin,
         sag,
-        stemmerResponse.value,
+        partyVotes,
+        totals,
         AFSTEMNINGSTYPE_MAP[afstemning.typeid] ?? "Ukendt"
       )
     )

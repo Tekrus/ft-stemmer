@@ -4,18 +4,28 @@ vi.mock("@/lib/oda/client", () => ({
   fetchFromOda: vi.fn(),
   fetchSagstrin: vi.fn(),
   fetchSag: vi.fn(),
-  fetchStemmer: vi.fn(),
+  fetchStemmerRaw: vi.fn(),
+  fetchPeriode: vi.fn(),
 }))
 
 vi.mock("@/lib/oda/mapper", () => ({
-  mapToVoteSummary: vi.fn((_a, _st, _s, _stemmer, type) => ({
+  mapStemmeToPartyVotes: vi.fn(() => ({
+    partyVotes: [],
+    totals: { for: 0, against: 0, absent: 0, abstained: 0, total: 0 },
+  })),
+  mapToVoteSummary: vi.fn((_a, _st, _s, _pv, _t, type) => ({
     id: _a.id,
     type,
   })),
 }))
 
+vi.mock("@/lib/kv/client", () => ({
+  kvGet: vi.fn().mockResolvedValue(null),
+  kvSet: vi.fn().mockResolvedValue(undefined),
+}))
+
 import { fetchVoteSummaries } from "@/lib/oda/fetch-votes"
-import { fetchFromOda, fetchSagstrin, fetchSag, fetchStemmer } from "@/lib/oda/client"
+import { fetchFromOda, fetchSagstrin, fetchSag, fetchStemmerRaw } from "@/lib/oda/client"
 
 describe("fetchVoteSummaries", () => {
   it("processes votes in parallel and returns all results in order", async () => {
@@ -30,7 +40,7 @@ describe("fetchVoteSummaries", () => {
     })
     vi.mocked(fetchSagstrin).mockImplementation(async (id) => ({ sagid: id * 10 }))
     vi.mocked(fetchSag).mockImplementation(async (id) => ({ id }))
-    vi.mocked(fetchStemmer).mockImplementation(async () => ({ value: [] }))
+    vi.mocked(fetchStemmerRaw).mockImplementation(async () => ({ value: [] }))
 
     const results = await fetchVoteSummaries(3)
 
@@ -44,7 +54,7 @@ describe("fetchVoteSummaries", () => {
     vi.mocked(fetchFromOda).mockResolvedValueOnce({
       value: [{ id: 1, sagstrinid: null, typeid: 1 }],
     })
-    vi.mocked(fetchStemmer).mockResolvedValueOnce({ value: [] })
+    vi.mocked(fetchStemmerRaw).mockResolvedValueOnce({ value: [] })
 
     const results = await fetchVoteSummaries(1)
 
