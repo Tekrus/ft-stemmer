@@ -19,9 +19,14 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-semibold tracking-[-0.025em]">FT Stemmer</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">Seneste afstemninger i Folketinget</p>
         </div>
-        <Link href="/search" className="rounded border border-input px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors">
-          Sog
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/compare" className="rounded border border-input px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors">
+            Sammenlign
+          </Link>
+          <Link href="/search" className="rounded border border-input px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors">
+            Sog
+          </Link>
+        </div>
       </header>
 
       <section className="space-y-4">
