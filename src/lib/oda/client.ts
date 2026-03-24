@@ -68,6 +68,13 @@ export async function fetchSag(id: number) {
   )
 }
 
+export async function fetchPeriode(id: number) {
+  return fetchFromOda<import("./types").OdaPeriode>(
+    `/Periode(${id})`,
+    0
+  )
+}
+
 export async function fetchStemmer(afstemningId: number) {
   const pageSize = 100
   const allStemmer: import("./types").OdaStemme[] = []

@@ -68,12 +68,24 @@ export function mapStemmeToPartyVotes(
   return { partyVotes, totals }
 }
 
+function buildFtUrl(sag: OdaSag, periodeKode: string | null): string | null {
+  if (!periodeKode || sag.nummerprefix !== "L") return null
+  return `https://www.ft.dk/samling/${periodeKode}/lovforslag/l${sag.nummernumerisk}/index.htm`
+}
+
+function buildRetsinformationUrl(sag: OdaSag): string | null {
+  if (!sag.lovnummer || !sag.lovnummerdato) return null
+  const year = sag.lovnummerdato.slice(0, 4)
+  return `https://www.retsinformation.dk/eli/lta/${year}/${sag.lovnummer}`
+}
+
 export function mapToVoteSummary(
   afstemning: OdaAfstemning,
   sagstrin: OdaSagstrin | null,
   sag: OdaSag | null,
   stemmer: readonly OdaStemme[],
-  afstemningstype: string
+  afstemningstype: string,
+  periodeKode: string | null = null
 ): VoteSummary {
   const { partyVotes, totals } = mapStemmeToPartyVotes(stemmer)
   return {
@@ -88,6 +100,8 @@ export function mapToVoteSummary(
     type: afstemningstype,
     lawNumber: sag?.lovnummer ?? null,
     lawDate: sag?.lovnummerdato ?? null,
+    ftUrl: sag ? buildFtUrl(sag, periodeKode) : null,
+    retsinformationUrl: sag ? buildRetsinformationUrl(sag) : null,
     partyVotes,
     totals,
   }

@@ -11,6 +11,7 @@ type SummaryInput = {
   readonly nummer: string
   readonly lovnummer: string | null
   readonly lovnummerdato: string | null
+  readonly retsinformationUrl: string | null
   readonly vedtaget: boolean
   readonly totals: VoteTotals
 }
@@ -51,7 +52,7 @@ function hashResume(resume: string): string {
 
 function buildPrompt(input: SummaryInput): string {
   const lawRef = input.lovnummer
-    ? `Lov nr. ${input.lovnummer} af ${input.lovnummerdato}.`
+    ? `Lov nr. ${input.lovnummer} af ${input.lovnummerdato}.${input.retsinformationUrl ? ` Loven kan læses her: ${input.retsinformationUrl}` : ""}`
     : ""
   const outcome = input.vedtaget
     ? `Forslaget blev vedtaget med ${input.totals.for} stemmer for og ${input.totals.against} imod.`

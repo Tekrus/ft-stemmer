@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { fetchAfstemning, fetchSagstrin, fetchSag, fetchStemmer } from "@/lib/oda/client"
+import { fetchAfstemning, fetchSagstrin, fetchSag, fetchStemmer, fetchPeriode } from "@/lib/oda/client"
 import { mapToVoteSummary } from "@/lib/oda/mapper"
 import { AISummary } from "@/components/ai-summary"
 import { AFSTEMNINGSTYPE_MAP } from "@/lib/oda/constants"
@@ -30,10 +30,18 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
     : null
   const sag = sagstrin ? await fetchSag(sagstrin.sagid) : null
   const stemmerResponse = await fetchStemmer(afstemning.id)
+  let periodeKode: string | null = null
+  if (sag) {
+    try {
+      const periode = await fetchPeriode(sag.periodeid)
+      periodeKode = periode.kode
+    } catch { /* ignore */ }
+  }
 
   const vote = mapToVoteSummary(
     afstemning, sagstrin, sag, stemmerResponse.value,
-    AFSTEMNINGSTYPE_MAP[afstemning.typeid] ?? "Ukendt"
+    AFSTEMNINGSTYPE_MAP[afstemning.typeid] ?? "Ukendt",
+    periodeKode
   )
 
   return (
@@ -54,6 +62,20 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
           {vote.type}
           {vote.lawNumber && ` · Lov nr. ${vote.lawNumber}`}
         </p>
+        {(vote.ftUrl || vote.retsinformationUrl) && (
+          <div className="mt-2 flex flex-wrap gap-3">
+            {vote.ftUrl && (
+              <a href={vote.ftUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2">
+                Se lovforslag på ft.dk ↗
+              </a>
+            )}
+            {vote.retsinformationUrl && (
+              <a href={vote.retsinformationUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2">
+                Se lov på retsinformation.dk ↗
+              </a>
+            )}
+          </div>
+        )}
       </header>
 
       <div className="space-y-8">
@@ -66,6 +88,7 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
               nummer={vote.number}
               lovnummer={vote.lawNumber}
               lovnummerdato={vote.lawDate}
+              retsinformationUrl={vote.retsinformationUrl}
               vedtaget={vote.passed}
               totals={vote.totals}
             />

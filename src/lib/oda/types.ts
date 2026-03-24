@@ -27,9 +27,21 @@ export type OdaSag = {
   readonly titelkort: string
   readonly resume: string | null
   readonly nummer: string
+  readonly nummerprefix: string
+  readonly nummernumerisk: number
+  readonly periodeid: number
   readonly lovnummer: string | null
   readonly lovnummerdato: string | null
   readonly afstemningskonklusion: string | null
+  readonly opdateringsdato: string
+}
+
+export type OdaPeriode = {
+  readonly id: number
+  readonly kode: string
+  readonly titel: string
+  readonly startdato: string
+  readonly slutdato: string | null
   readonly opdateringsdato: string
 }
 

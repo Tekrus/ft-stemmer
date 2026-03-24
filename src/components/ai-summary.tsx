@@ -15,6 +15,7 @@ type Props = {
   readonly nummer: string
   readonly lovnummer: string | null
   readonly lovnummerdato: string | null
+  readonly retsinformationUrl: string | null
   readonly vedtaget: boolean
   readonly totals: VoteTotals
 }
