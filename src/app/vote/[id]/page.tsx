@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { fetchFromOda, fetchSagstrin, fetchSag, fetchStemmer } from "@/lib/oda/client"
+import { fetchAfstemning, fetchSagstrin, fetchSag, fetchStemmer } from "@/lib/oda/client"
 import { mapToVoteSummary } from "@/lib/oda/mapper"
 import { AISummary } from "@/components/ai-summary"
 import { AFSTEMNINGSTYPE_MAP } from "@/lib/oda/constants"
@@ -11,7 +11,7 @@ import { PartyTable } from "@/components/party-table"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { OdaAfstemning } from "@/lib/oda/types"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 10800
 
 export default async function VoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -20,7 +20,7 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
 
   let afstemning: OdaAfstemning
   try {
-    afstemning = await fetchFromOda<OdaAfstemning>(`/Afstemning(${voteId})`)
+    afstemning = await fetchAfstemning(voteId)
   } catch {
     notFound()
   }

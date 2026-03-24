@@ -5,7 +5,7 @@ import { fetchPartyVotes } from "@/lib/oda/fetch-party-votes"
 import { PartyBadge } from "@/components/party-badge"
 import { PartyVoteList } from "@/components/party-vote-list"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 10800
 
 export default async function PartyPage({ params }: { params: Promise<{ abbreviation: string }> }) {
   const { abbreviation } = await params

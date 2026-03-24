@@ -6,7 +6,7 @@ import { VoteCard } from "@/components/vote-card"
 import { PartyBadge } from "@/components/party-badge"
 import { LoadMoreButton } from "@/components/load-more-button"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 10800
 
 export default async function DashboardPage() {
   const votes = await fetchVoteSummaries(config.pagination.defaultPageSize)
