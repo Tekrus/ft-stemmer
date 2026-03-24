@@ -1,7 +1,7 @@
 "use client"
 
-import { useRouter, useSearchParams } from "next/navigation"
-import { useCallback } from "react"
+import { useRouter } from "next/navigation"
+import { useState, useCallback, useTransition } from "react"
 import { PARTY_MAP } from "@/lib/parties"
 import { PartyBadge } from "./party-badge"
 
@@ -14,34 +14,42 @@ const parties = Object.entries(PARTY_MAP)
 
 export function PartySelector({ selectedA, selectedB }: Props) {
   const router = useRouter()
-  const searchParams = useSearchParams()
+  const [localA, setLocalA] = useState(selectedA)
+  const [localB, setLocalB] = useState(selectedB)
+  const [, startTransition] = useTransition()
 
-  const updateParams = useCallback(
+  const updateSelection = useCallback(
     (key: "a" | "b", value: string) => {
-      const params = new URLSearchParams(searchParams.toString())
-      if (params.get(key) === value) {
-        params.delete(key)
-      } else {
-        params.set(key, value)
-      }
-      router.replace(`/compare?${params.toString()}`)
+      const currentA = key === "a" ? (localA === value ? null : value) : localA
+      const currentB = key === "b" ? (localB === value ? null : value) : localB
+
+      if (key === "a") setLocalA(currentA)
+      if (key === "b") setLocalB(currentB)
+
+      const params = new URLSearchParams()
+      if (currentA) params.set("a", currentA)
+      if (currentB) params.set("b", currentB)
+
+      startTransition(() => {
+        router.replace(`/compare?${params.toString()}`)
+      })
     },
-    [router, searchParams]
+    [router, localA, localB]
   )
 
   return (
     <div className="space-y-4">
       <SelectorRow
         label="Parti A"
-        selected={selectedA}
-        excludedAbbr={selectedB}
-        onSelect={(abbr) => updateParams("a", abbr)}
+        selected={localA}
+        excludedAbbr={localB}
+        onSelect={(abbr) => updateSelection("a", abbr)}
       />
       <SelectorRow
         label="Parti B"
-        selected={selectedB}
-        excludedAbbr={selectedA}
-        onSelect={(abbr) => updateParams("b", abbr)}
+        selected={localB}
+        excludedAbbr={localA}
+        onSelect={(abbr) => updateSelection("b", abbr)}
       />
     </div>
   )
