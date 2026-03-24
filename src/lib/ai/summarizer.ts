@@ -32,7 +32,26 @@ const MODEL_FALLBACK_CHAIN = [
 ] as const
 
 const SYSTEM_PROMPT =
-  "Opsummer dette lovforslag i 2-3 sætninger på dansk i et letforståeligt sprog. Forklar hvad det betyder for borgerne. Nævn om forslaget blev vedtaget eller forkastet og med hvilken margin."
+  "Opsummer dette lovforslag i 2-3 sætninger på dansk i et letforståeligt sprog. Forklar hvad det betyder for borgerne. Nævn om forslaget blev vedtaget eller forkastet og med hvilken margin. Hvis den fulde lovtekst er inkluderet, brug den som primær kilde."
+
+const MAX_LAW_TEXT_CHARS = 8000
+
+async function fetchLawText(retsinformationUrl: string): Promise<string | null> {
+  const xmlUrl = `${retsinformationUrl}/xml`
+  try {
+    const response = await fetch(xmlUrl, { next: { revalidate: 0 } })
+    if (!response.ok) return null
+    const xml = await response.text()
+    const chars = xml.match(/<Char[^>]*>([^<]+)<\/Char>/g)
+    if (!chars) return null
+    const text = chars
+      .map((tag) => tag.replace(/<Char[^>]*>([^<]+)<\/Char>/, "$1"))
+      .join("\n")
+    return text.slice(0, MAX_LAW_TEXT_CHARS)
+  } catch {
+    return null
+  }
+}
 
 function hashResume(resume: string): string {
   let h1 = 0xdeadbeef
@@ -50,13 +69,17 @@ function hashResume(resume: string): string {
   return combined.toString(36)
 }
 
-function buildPrompt(input: SummaryInput): string {
+function buildPrompt(input: SummaryInput, lawText: string | null): string {
   const lawRef = input.lovnummer
-    ? `Lov nr. ${input.lovnummer} af ${input.lovnummerdato}.${input.retsinformationUrl ? ` Loven kan læses her: ${input.retsinformationUrl}` : ""}`
+    ? `Lov nr. ${input.lovnummer} af ${input.lovnummerdato}.`
     : ""
   const outcome = input.vedtaget
     ? `Forslaget blev vedtaget med ${input.totals.for} stemmer for og ${input.totals.against} imod.`
     : `Forslaget blev forkastet med ${input.totals.for} stemmer for og ${input.totals.against} imod.`
+
+  const lawSection = lawText
+    ? `\n\nFulde lovtekst fra retsinformation.dk:\n${lawText}`
+    : ""
 
   return `Lovforslag: ${input.nummer} — ${input.titel}
 
@@ -66,7 +89,7 @@ ${lawRef}
 
 ${outcome}
 
-Samlet: ${input.totals.for} for, ${input.totals.against} imod, ${input.totals.absent} fravær, ${input.totals.abstained} hverken for eller imod.`
+Samlet: ${input.totals.for} for, ${input.totals.against} imod, ${input.totals.absent} fravær, ${input.totals.abstained} hverken for eller imod.${lawSection}`
 }
 
 async function generateWithFallback(prompt: string): Promise<{ text: string; model: string }> {
@@ -103,7 +126,10 @@ export async function getOrGenerateSummary(input: SummaryInput): Promise<string 
   }
 
   try {
-    const { text, model } = await generateWithFallback(buildPrompt(input))
+    const lawText = input.retsinformationUrl
+      ? await fetchLawText(input.retsinformationUrl)
+      : null
+    const { text, model } = await generateWithFallback(buildPrompt(input, lawText))
 
     await kvSet<CachedSummary>(kvKey, {
       summary: text,
