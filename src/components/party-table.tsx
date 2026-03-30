@@ -38,7 +38,7 @@ export function PartyTable({ partyVotes }: Props) {
                 </div>
                 {/* Inline party vote bar */}
                 {total > 0 && (
-                  <div className="mt-1.5 ml-[22px] flex h-1 w-24 overflow-hidden rounded-full bg-muted/50">
+                  <div className="mt-1.5 ml-[22px] flex h-1.5 w-24 overflow-hidden rounded-full bg-muted/60">
                     <div
                       className="h-full rounded-full"
                       style={{ width: `${forPct}%`, backgroundColor: p.color }}

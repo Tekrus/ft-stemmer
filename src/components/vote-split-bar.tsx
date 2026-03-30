@@ -31,7 +31,7 @@ export function VoteSplitBar({ totalFor, totalAgainst, partyVotes }: Props) {
         {againstParties.map((p) => (
           <div
             key={`against-${p.party}`}
-            className="h-full opacity-35 transition-all duration-300"
+            className="h-full opacity-50 transition-all duration-300"
             style={{
               width: `${(p.against / total) * 100}%`,
               backgroundColor: p.color,

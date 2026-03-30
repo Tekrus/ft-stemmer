@@ -56,7 +56,7 @@ export function SearchBar() {
       {hasSearched && !isPending && results.length === 0 && (
         <div className="rounded-xl border border-border bg-card p-8 text-center shadow-card">
           <p className="text-sm text-muted-foreground">
-            Ingen resultater for &ldquo;{query}&rdquo;
+            Ingen resultater for "{query}"
           </p>
           <p className="mt-1 text-xs text-muted-foreground/60">Prøv at justere din søgning</p>
         </div>

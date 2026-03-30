@@ -38,7 +38,7 @@ export function VoteBar({ partyVotes, totalFor, totalAgainst }: Props) {
         {againstParties.map((p) => (
           <div
             key={`against-${p.party}`}
-            className="group/seg relative h-full opacity-45 transition-all duration-300"
+            className="group/seg relative h-full opacity-55 transition-all duration-300"
             style={{
               width: `${(p.against / total) * 100}%`,
               backgroundColor: p.color,

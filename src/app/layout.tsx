@@ -22,7 +22,7 @@ const mono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "FT Stemmer — Folketingets Afstemninger",
+  title: "FT Stemmer | Folketingets Afstemninger",
   description: "Overskueligt overblik over afstemninger i Folketinget",
 }
 

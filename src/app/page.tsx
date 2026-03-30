@@ -15,19 +15,30 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-3xl px-4 pb-16 pt-8">
       {/* Hero */}
       <section className="mb-12 animate-fade-up">
-        <div className="rounded-xl bg-card p-6 shadow-card sm:p-8">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="h-1 w-8 rounded-full bg-dannebrog" />
-            <span className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
-              Folketinget
-            </span>
+        <div className="relative overflow-hidden rounded-xl bg-card p-6 shadow-card sm:p-8">
+          {/* Subtle decorative accent */}
+          <div
+            className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-[0.06]"
+            style={{ background: "radial-gradient(circle, var(--color-dannebrog) 0%, transparent 70%)" }}
+          />
+          <div
+            className="pointer-events-none absolute -right-2 -top-2 h-16 w-16 rounded-full opacity-[0.04]"
+            style={{ background: "radial-gradient(circle, var(--color-dannebrog) 0%, transparent 70%)" }}
+          />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="h-1 w-8 rounded-full bg-dannebrog" />
+              <span className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+                Folketinget
+              </span>
+            </div>
+            <h1 className="font-heading text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
+              Seneste afstemninger
+            </h1>
+            <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+              Hvad stemmer Folketinget om? Se de nyeste afstemninger her.
+            </p>
           </div>
-          <h1 className="font-heading text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
-            Seneste afstemninger
-          </h1>
-          <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-            Følg med i hvad Folketinget stemmer om — fra lovforslag til beslutningsforslag.
-          </p>
         </div>
       </section>
 

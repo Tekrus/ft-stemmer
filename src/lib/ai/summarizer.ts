@@ -31,8 +31,16 @@ const MODEL_FALLBACK_CHAIN = [
   "gemini-3-flash",
 ] as const
 
-const SYSTEM_PROMPT =
-  "Opsummer dette lovforslag i 2-3 sætninger på dansk i et letforståeligt sprog. Forklar hvad det betyder for borgerne. Nævn om forslaget blev vedtaget eller forkastet og med hvilken margin. Hvis den fulde lovtekst er inkluderet, brug den som primær kilde."
+const SYSTEM_PROMPT = `Du forklarer danske lovforslag så en 15-årig kan forstå det.
+
+Regler:
+- Max 2-3 sætninger.
+- Forklar hvad loven rent faktisk ændrer for folk i deres hverdag. Brug konkrete eksempler hvis muligt.
+- Undgå juridisk sprog. Sig "du får" i stedet for "borgere modtager". Sig "staten betaler" i stedet for "der afsættes midler".
+- Nævn IKKE afstemningsresultatet.
+- Start ALDRIG med "Her er" eller "Dette lovforslag" eller lignende. Gå direkte til sagen.
+- Brug ikke em-dash. Brug punktum eller komma.
+- Hvis den fulde lovtekst er inkluderet, brug den som primær kilde.`
 
 const MAX_LAW_TEXT_CHARS = 8000
 
@@ -73,23 +81,16 @@ function buildPrompt(input: SummaryInput, lawText: string | null): string {
   const lawRef = input.lovnummer
     ? `Lov nr. ${input.lovnummer} af ${input.lovnummerdato}.`
     : ""
-  const outcome = input.vedtaget
-    ? `Forslaget blev vedtaget med ${input.totals.for} stemmer for og ${input.totals.against} imod.`
-    : `Forslaget blev forkastet med ${input.totals.for} stemmer for og ${input.totals.against} imod.`
 
   const lawSection = lawText
     ? `\n\nFulde lovtekst fra retsinformation.dk:\n${lawText}`
     : ""
 
-  return `Lovforslag: ${input.nummer} — ${input.titel}
+  return `Lovforslag: ${input.nummer}: ${input.titel}
 
 Resume: ${input.resume}
 
-${lawRef}
-
-${outcome}
-
-Samlet: ${input.totals.for} for, ${input.totals.against} imod, ${input.totals.absent} fravær, ${input.totals.abstained} hverken for eller imod.${lawSection}`
+${lawRef}${lawSection}`
 }
 
 async function generateWithFallback(prompt: string): Promise<{ text: string; model: string }> {
