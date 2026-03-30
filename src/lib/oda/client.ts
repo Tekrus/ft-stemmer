@@ -25,7 +25,7 @@ export async function fetchFromOda<T>(path: string, ttl?: number): Promise<T> {
       await delay(Math.pow(2, attempt - 1) * 1000)
     }
 
-    const response = await fetch(url)
+    const response = await fetch(url, { cache: "no-store" })
 
     if (response.ok) {
       const data = (await response.json()) as T
@@ -89,7 +89,7 @@ export async function fetchStemmerRaw(afstemningId: number) {
     const path = `/Stemme?$filter=afstemningid eq ${afstemningId}&$expand=Akt%C3%B8r&$top=${pageSize}&$skip=${skip}`
     const url = `${config.oda.baseUrl}${path}&$format=json`
 
-    const response = await fetch(url)
+    const response = await fetch(url, { cache: "no-store" })
     if (!response.ok) {
       throw new Error(`ODA API error: ${response.status} for ${path}`)
     }
