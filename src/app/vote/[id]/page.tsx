@@ -1,6 +1,7 @@
 import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import { ArrowLeft, ExternalLink } from "lucide-react"
 import { fetchAfstemning, fetchSagstrin, fetchSag, fetchStemmerRaw, fetchPeriode } from "@/lib/oda/client"
 import { mapToVoteSummary, mapStemmeToPartyVotes } from "@/lib/oda/mapper"
 import { kvGet, kvSet } from "@/lib/kv/client"
@@ -55,32 +56,50 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
-      <Link href="/" className="mb-6 inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-        ← Tilbage
+      <Link
+        href="/"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Tilbage
       </Link>
 
-      <header className="mb-8">
-        <div className="flex items-center gap-3">
+      <header className="mb-10">
+        <div className="flex items-center gap-2.5">
           <span className="font-mono text-sm tabular-nums text-muted-foreground">{vote.number}</span>
           <VoteStatusBadge passed={vote.passed} />
         </div>
-        <h1 className="mt-2 text-xl font-semibold tracking-[-0.02em] leading-snug">{vote.title}</h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <h1 className="mt-2 font-heading text-xl font-semibold tracking-[-0.02em] leading-snug">
+          {vote.title}
+        </h1>
+        <p className="mt-2 text-[13px] text-muted-foreground">
           {new Date(vote.date).toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" })}
           {" · "}
           {vote.type}
           {vote.lawNumber && ` · Lov nr. ${vote.lawNumber}`}
         </p>
         {(vote.ftUrl || vote.retsinformationUrl) && (
-          <div className="mt-2 flex flex-wrap gap-3">
+          <div className="mt-3 flex flex-wrap gap-3">
             {vote.ftUrl && (
-              <a href={vote.ftUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2">
-                Se lovforslag på ft.dk ↗
+              <a
+                href={vote.ftUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-dannebrog underline underline-offset-2 transition-colors hover:opacity-80"
+              >
+                Se lovforslag på ft.dk
+                <ExternalLink className="h-3 w-3" />
               </a>
             )}
             {vote.retsinformationUrl && (
-              <a href={vote.retsinformationUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline underline-offset-2">
-                Se lov på retsinformation.dk ↗
+              <a
+                href={vote.retsinformationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-dannebrog underline underline-offset-2 transition-colors hover:opacity-80"
+              >
+                Se lov på retsinformation.dk
+                <ExternalLink className="h-3 w-3" />
               </a>
             )}
           </div>
@@ -106,15 +125,19 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
 
         {vote.resume && (
           <section>
-            <h2 className="mb-3 text-sm font-medium text-muted-foreground">Resume fra Folketinget</h2>
-            <div className="rounded border border-border bg-card p-4">
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
+              Resume fra Folketinget
+            </h2>
+            <div className="rounded-md border border-border bg-card p-4">
               <p className="text-sm leading-relaxed whitespace-pre-line">{vote.resume}</p>
             </div>
           </section>
         )}
 
         <section>
-          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Resultat</h2>
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
+            Resultat
+          </h2>
           <VoteBar
             partyVotes={vote.partyVotes}
             totalFor={vote.totals.for}
@@ -123,15 +146,19 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
         </section>
 
         <section>
-          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Partier</h2>
-          <div className="rounded border border-border overflow-hidden">
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
+            Partier
+          </h2>
+          <div className="rounded-md border border-border overflow-hidden">
             <PartyTable partyVotes={vote.partyVotes} />
           </div>
         </section>
 
         <section className="pb-8">
-          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Konklusion</h2>
-          <div className="rounded border border-border bg-card p-4">
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
+            Konklusion
+          </h2>
+          <div className="rounded-md border border-border bg-card p-4">
             <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{vote.conclusion}</p>
           </div>
         </section>

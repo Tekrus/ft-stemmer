@@ -9,7 +9,7 @@ export function PartyBadge({ abbreviation, color, count }: Props) {
     <span className="inline-flex items-center gap-1 text-xs">
       <span
         data-party-dot
-        className="inline-block h-2.5 w-2.5 rounded-full"
+        className="inline-block h-2.5 w-2.5 rounded-full ring-1 ring-black/5"
         style={{ backgroundColor: color }}
         aria-hidden="true"
       />
