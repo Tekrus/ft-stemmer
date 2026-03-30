@@ -18,7 +18,7 @@ export function ComparisonResult({ result }: Props) {
   )
   const [totalScanned, setTotalScanned] = useState(result.totalScanned)
   const [loading, setLoading] = useState(false)
-  const [hasMore, setHasMore] = useState(result.totalScanned > 0)
+  const [exhausted, setExhausted] = useState(result.exhausted)
 
   const partyAInfo = getPartyInfo(result.partyA)
   const partyBInfo = getPartyInfo(result.partyB)
@@ -39,8 +39,8 @@ export function ComparisonResult({ result }: Props) {
       setDisagreements((prev) => [...prev, ...batch.disagreements])
       setTotalScanned((prev) => prev + batch.totalScanned)
 
-      if (batch.totalScanned < 50) {
-        setHasMore(false)
+      if (batch.exhausted) {
+        setExhausted(true)
       }
     } finally {
       setLoading(false)
@@ -55,7 +55,7 @@ export function ComparisonResult({ result }: Props) {
         af {totalScanned} afstemninger
       </p>
 
-      {disagreements.length === 0 && !hasMore && (
+      {disagreements.length === 0 && exhausted && (
         <p className="text-sm text-muted-foreground">
           Ingen uenigheder fundet i de seneste {totalScanned} afstemninger.
         </p>
@@ -105,7 +105,7 @@ export function ComparisonResult({ result }: Props) {
         </div>
       )}
 
-      {hasMore && (
+      {!exhausted && (
         <button
           type="button"
           disabled={loading}

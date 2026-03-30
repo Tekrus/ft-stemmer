@@ -2,8 +2,6 @@ import type { NextRequest } from "next/server"
 import { PARTY_MAP } from "@/lib/parties"
 import { fetchComparisonVotes } from "@/lib/oda/fetch-comparison"
 
-const BATCH_SIZE = 50
-
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
   const a = searchParams.get("a")?.toUpperCase() ?? ""
@@ -17,6 +15,6 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const result = await fetchComparisonVotes(a, b, BATCH_SIZE, skip)
+  const result = await fetchComparisonVotes(a, b, 5, skip)
   return Response.json(result)
 }
