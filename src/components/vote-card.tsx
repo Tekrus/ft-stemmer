@@ -12,7 +12,7 @@ type Props = {
 export function VoteCard({ vote }: Props) {
   return (
     <Link href={`/vote/${vote.id}`} className="group block">
-      <article className="rounded-xl border border-border bg-card p-4 shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 sm:p-5">
+      <article className="cursor-pointer rounded-xl border border-border bg-card p-4 shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 sm:p-5">
         {/* Header row */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">

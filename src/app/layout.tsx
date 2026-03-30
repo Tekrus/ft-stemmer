@@ -37,8 +37,14 @@ export default function RootLayout({
         className={`${body.variable} ${heading.variable} ${mono.variable} antialiased`}
         style={{ fontVariantNumeric: "tabular-nums" }}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-md focus:bg-card focus:px-4 focus:py-2 focus:text-sm focus:shadow-elevated"
+        >
+          Spring til indhold
+        </a>
         <SiteHeader />
-        <main className="min-h-[calc(100vh-3.5rem)] bg-background">
+        <main id="main-content" className="min-h-[calc(100vh-3.5rem)] bg-background">
           {children}
         </main>
       </body>

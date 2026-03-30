@@ -16,13 +16,14 @@ function PartyChip({ party, color, count }: { party: string; color: string; coun
   return (
     <span
       className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium leading-none"
-      style={{
-        backgroundColor: `rgb(${hexToRgb(color)} / 0.12)`,
-        color,
-      }}
+      style={{ backgroundColor: `rgb(${hexToRgb(color)} / 0.12)` }}
     >
-      {party}
-      <span className="font-mono tabular-nums opacity-70">{count}</span>
+      <span
+        className="inline-block h-1.5 w-1.5 rounded-full shrink-0"
+        style={{ backgroundColor: color }}
+      />
+      <span className="text-foreground">{party}</span>
+      <span className="font-mono tabular-nums text-muted-foreground">{count}</span>
     </span>
   )
 }
