@@ -26,17 +26,19 @@ export async function AISummary(props: Props) {
   if (!summary) return null
 
   return (
-    <section>
-      <h2 className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.04em] text-muted-foreground">
+    <section className="animate-fade-up">
+      <h2 className="mb-3 flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
         <Sparkles className="h-3.5 w-3.5" />
         AI Opsummering
       </h2>
-      <div className="rounded-md border border-dannebrog/20 bg-dannebrog-light/30 p-4 dark:border-dannebrog/15 dark:bg-dannebrog-light/20">
+      <div className="rounded-xl border border-dannebrog/15 bg-gradient-to-br from-dannebrog-light/40 to-dannebrog-light/10 p-5 shadow-card">
         <div
-          className="text-sm leading-relaxed [&_p]:mb-2 [&_p:last-child]:mb-0 [&_strong]:font-semibold"
+          className="text-[15px] leading-relaxed [&_p]:mb-2.5 [&_p:last-child]:mb-0 [&_strong]:font-semibold"
           dangerouslySetInnerHTML={{ __html: `<p>${formatSummary(summary)}</p>` }}
         />
-        <p className="mt-3 text-[11px] text-muted-foreground">Genereret af AI — kan indeholde fejl</p>
+        <p className="mt-4 text-[11px] text-muted-foreground/70">
+          Genereret af AI — kan indeholde fejl
+        </p>
       </div>
     </section>
   )

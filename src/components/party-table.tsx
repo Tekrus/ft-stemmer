@@ -1,6 +1,5 @@
 import type { PartyVote } from "@/types/vote"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { PartyBadge } from "./party-badge"
 
 type Props = {
   readonly partyVotes: readonly PartyVote[]
@@ -13,7 +12,7 @@ export function PartyTable({ partyVotes }: Props) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[200px]">Parti</TableHead>
+          <TableHead className="w-[180px]">Parti</TableHead>
           <TableHead className="text-right w-16">For</TableHead>
           <TableHead className="text-right w-16">Imod</TableHead>
           <TableHead className="text-right w-16">Fravær</TableHead>
@@ -21,28 +20,47 @@ export function PartyTable({ partyVotes }: Props) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {sorted.map((p) => (
-          <TableRow key={p.party}>
-            <TableCell className="py-2.5">
-              <div className="flex items-center gap-2">
-                <PartyBadge abbreviation={p.party} color={p.color} />
-                <span className="text-xs text-muted-foreground">{p.partyName}</span>
-              </div>
-            </TableCell>
-            <TableCell className="text-right py-2.5 font-mono tabular-nums text-sm">
-              {p.for > 0 ? <span className="text-green-700 dark:text-green-400 font-medium">{p.for}</span> : "—"}
-            </TableCell>
-            <TableCell className="text-right py-2.5 font-mono tabular-nums text-sm">
-              {p.against > 0 ? <span className="text-red-700 dark:text-red-400 font-medium">{p.against}</span> : "—"}
-            </TableCell>
-            <TableCell className="text-right py-2.5 font-mono tabular-nums text-sm text-muted-foreground">
-              {p.absent > 0 ? p.absent : "—"}
-            </TableCell>
-            <TableCell className="text-right py-2.5 font-mono tabular-nums text-sm text-muted-foreground">
-              {p.abstained > 0 ? p.abstained : "—"}
-            </TableCell>
-          </TableRow>
-        ))}
+        {sorted.map((p) => {
+          const total = p.for + p.against
+          const forPct = total > 0 ? (p.for / total) * 100 : 0
+          return (
+            <TableRow key={p.party} className="group">
+              <TableCell className="py-3">
+                <div className="flex items-center gap-2.5">
+                  <span
+                    className="inline-block h-3 w-3 rounded-full ring-1 ring-black/5 shrink-0"
+                    style={{ backgroundColor: p.color }}
+                  />
+                  <div className="min-w-0">
+                    <span className="block text-sm font-medium">{p.party}</span>
+                    <span className="block text-[11px] text-muted-foreground truncate">{p.partyName}</span>
+                  </div>
+                </div>
+                {/* Inline party vote bar */}
+                {total > 0 && (
+                  <div className="mt-1.5 ml-[22px] flex h-1 w-24 overflow-hidden rounded-full bg-muted/50">
+                    <div
+                      className="h-full rounded-full"
+                      style={{ width: `${forPct}%`, backgroundColor: p.color }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell className="text-right py-3 font-mono tabular-nums text-sm">
+                {p.for > 0 ? <span className="text-green-700 dark:text-green-400 font-semibold">{p.for}</span> : <span className="text-muted-foreground/40">—</span>}
+              </TableCell>
+              <TableCell className="text-right py-3 font-mono tabular-nums text-sm">
+                {p.against > 0 ? <span className="text-red-700 dark:text-red-400 font-semibold">{p.against}</span> : <span className="text-muted-foreground/40">—</span>}
+              </TableCell>
+              <TableCell className="text-right py-3 font-mono tabular-nums text-sm text-muted-foreground">
+                {p.absent > 0 ? p.absent : <span className="text-muted-foreground/40">—</span>}
+              </TableCell>
+              <TableCell className="text-right py-3 font-mono tabular-nums text-sm text-muted-foreground">
+                {p.abstained > 0 ? p.abstained : <span className="text-muted-foreground/40">—</span>}
+              </TableCell>
+            </TableRow>
+          )
+        })}
       </TableBody>
     </Table>
   )

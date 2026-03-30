@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import { ChevronDown, Loader2 } from "lucide-react"
 import { loadMoreVotes } from "@/lib/actions/load-more"
 import type { VoteSummary } from "@/types/vote"
 import { VoteCard } from "./vote-card"
@@ -29,16 +30,28 @@ export function LoadMoreButton({ initialCount }: Props) {
 
   return (
     <>
-      {votes.map((vote) => (
-        <VoteCard key={vote.id} vote={vote} />
-      ))}
+      <div className="space-y-3">
+        {votes.map((vote) => (
+          <VoteCard key={vote.id} vote={vote} />
+        ))}
+      </div>
       {hasMore && (
         <button
           onClick={handleLoadMore}
           disabled={isPending}
-          className="mt-4 w-full py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground hover:underline underline-offset-2 disabled:opacity-50"
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-card py-3 text-sm font-medium text-muted-foreground shadow-card transition-all duration-200 hover:shadow-card-hover hover:text-foreground hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
         >
-          {isPending ? "Henter..." : "Vis flere"}
+          {isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Henter...
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-4 w-4" />
+              Vis flere afstemninger
+            </>
+          )}
         </button>
       )}
     </>

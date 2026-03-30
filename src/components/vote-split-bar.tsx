@@ -16,22 +16,22 @@ export function VoteSplitBar({ totalFor, totalAgainst, partyVotes }: Props) {
 
   return (
     <div className="w-full">
-      <div className="flex h-1.5 w-full overflow-hidden rounded-full" style={{ gap: "1.5px" }}>
+      <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted/50" style={{ gap: "1.5px" }}>
         {forParties.map((p) => (
           <div
             key={`for-${p.party}`}
-            className="h-full"
+            className="h-full transition-all duration-300"
             style={{
               width: `${(p.for / total) * 100}%`,
               backgroundColor: p.color,
             }}
           />
         ))}
-        <div className="h-full w-px bg-background" />
+        <div className="h-full w-0.5 bg-background" />
         {againstParties.map((p) => (
           <div
             key={`against-${p.party}`}
-            className="h-full opacity-40"
+            className="h-full opacity-35 transition-all duration-300"
             style={{
               width: `${(p.against / total) * 100}%`,
               backgroundColor: p.color,
@@ -39,9 +39,13 @@ export function VoteSplitBar({ totalFor, totalAgainst, partyVotes }: Props) {
           />
         ))}
       </div>
-      <div className="mt-1 flex justify-between font-mono text-[11px] tabular-nums text-muted-foreground">
-        <span>{totalFor} for ({forPct}%)</span>
-        <span>{totalAgainst} imod ({100 - forPct}%)</span>
+      <div className="mt-1.5 flex justify-between font-mono text-[11px] tabular-nums text-muted-foreground">
+        <span>
+          <span className="font-semibold text-foreground">{totalFor}</span> for ({forPct}%)
+        </span>
+        <span>
+          <span className="font-semibold text-foreground">{totalAgainst}</span> imod ({100 - forPct}%)
+        </span>
       </div>
     </div>
   )

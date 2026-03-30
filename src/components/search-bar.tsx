@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition, useCallback, useRef } from "react"
+import { Search, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { searchVotes } from "@/lib/actions/search"
 import type { VoteSummary } from "@/types/vote"
@@ -33,26 +34,43 @@ export function SearchBar() {
   }, [])
 
   return (
-    <div className="space-y-4">
-      <Input
-        type="search"
-        placeholder="Søg i lovforslag..."
-        value={query}
-        onChange={(e) => handleChange(e.target.value)}
-        className="w-full"
-      />
+    <div className="space-y-6">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder="Søg i lovforslag..."
+          value={query}
+          onChange={(e) => handleChange(e.target.value)}
+          className="w-full pl-9 h-10"
+        />
+      </div>
 
-      {isPending && <p className="text-sm text-muted-foreground">Søger...</p>}
-
-      {hasSearched && !isPending && results.length === 0 && (
-        <p className="text-sm text-muted-foreground">
-          Ingen resultater for &ldquo;{query}&rdquo;. Prøv at justere din søgning.
-        </p>
+      {isPending && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Søger...
+        </div>
       )}
 
-      <div className="space-y-4">
-        {results.map((vote) => (
-          <VoteCard key={vote.id} vote={vote} />
+      {hasSearched && !isPending && results.length === 0 && (
+        <div className="rounded-xl border border-border bg-card p-8 text-center shadow-card">
+          <p className="text-sm text-muted-foreground">
+            Ingen resultater for &ldquo;{query}&rdquo;
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground/60">Prøv at justere din søgning</p>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        {results.map((vote, i) => (
+          <div
+            key={vote.id}
+            className="animate-fade-up"
+            style={{ animationDelay: `${Math.min(i * 50, 300)}ms` }}
+          >
+            <VoteCard vote={vote} />
+          </div>
         ))}
       </div>
     </div>

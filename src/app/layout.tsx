@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { Source_Serif_4, DM_Sans, JetBrains_Mono } from "next/font/google"
+import { SiteHeader } from "@/components/site-header"
 import "./globals.css"
 
 const heading = Source_Serif_4({
@@ -32,8 +33,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="da">
-      <body className={`${body.variable} ${heading.variable} ${mono.variable} antialiased`}>
-        <main className="min-h-screen bg-background" style={{ fontVariantNumeric: "tabular-nums" }}>
+      <body
+        className={`${body.variable} ${heading.variable} ${mono.variable} antialiased`}
+        style={{ fontVariantNumeric: "tabular-nums" }}
+      >
+        <SiteHeader />
+        <main className="min-h-[calc(100vh-3.5rem)] bg-background">
           {children}
         </main>
       </body>

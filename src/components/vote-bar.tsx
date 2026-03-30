@@ -16,34 +16,50 @@ export function VoteBar({ partyVotes, totalFor, totalAgainst }: Props) {
 
   return (
     <div className="w-full">
-      <div className="flex h-7 w-full overflow-hidden rounded-md" style={{ gap: "2px" }}>
+      <div className="flex h-8 w-full overflow-hidden rounded-lg" style={{ gap: "2px" }}>
         {forParties.map((p) => (
           <div
             key={`for-${p.party}`}
-            className="h-full transition-all"
+            className="group/seg relative h-full transition-all duration-300"
             style={{
               width: `${(p.for / total) * 100}%`,
               backgroundColor: p.color,
             }}
             title={`${p.party}: ${p.for} for`}
-          />
+          >
+            {p.for / total > 0.08 && (
+              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white/90 opacity-0 group-hover/seg:opacity-100 transition-opacity">
+                {p.party}
+              </span>
+            )}
+          </div>
         ))}
         <div className="h-full w-0.5 bg-background" />
         {againstParties.map((p) => (
           <div
             key={`against-${p.party}`}
-            className="h-full opacity-40 transition-all"
+            className="group/seg relative h-full opacity-45 transition-all duration-300"
             style={{
               width: `${(p.against / total) * 100}%`,
               backgroundColor: p.color,
             }}
             title={`${p.party}: ${p.against} imod`}
-          />
+          >
+            {p.against / total > 0.08 && (
+              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white/70 opacity-0 group-hover/seg:opacity-100 transition-opacity">
+                {p.party}
+              </span>
+            )}
+          </div>
         ))}
       </div>
       <div className="mt-2 flex justify-between font-mono text-xs tabular-nums text-muted-foreground">
-        <span>For: {totalFor} ({forPct}%)</span>
-        <span>Imod: {totalAgainst} ({100 - forPct}%)</span>
+        <span>
+          For: <span className="font-semibold text-foreground">{totalFor}</span> ({forPct}%)
+        </span>
+        <span>
+          Imod: <span className="font-semibold text-foreground">{totalAgainst}</span> ({100 - forPct}%)
+        </span>
       </div>
     </div>
   )

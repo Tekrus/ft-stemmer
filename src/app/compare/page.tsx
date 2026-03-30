@@ -1,6 +1,4 @@
 import { Suspense } from "react"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
 import { PARTY_MAP } from "@/lib/parties"
 import { fetchComparisonVotes } from "@/lib/oda/fetch-comparison"
 import { PartySelector } from "@/components/party-selector"
@@ -31,29 +29,26 @@ export default async function ComparePage({ searchParams }: Props) {
     : null
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <Link
-        href="/"
-        className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Tilbage
-      </Link>
+    <div className="mx-auto max-w-3xl px-4 pb-16 pt-8">
+      <section className="mb-8 animate-fade-up">
+        <div className="rounded-xl bg-card p-6 shadow-card">
+          <h1 className="font-heading text-xl font-semibold tracking-[-0.02em]">Sammenlign partier</h1>
+          <p className="mt-1.5 text-[13px] text-muted-foreground">
+            Vælg to partier og se afstemninger, hvor de var uenige
+          </p>
+          <div className="mt-5">
+            <Suspense fallback={null}>
+              <PartySelector selectedA={partyA} selectedB={partyB} />
+            </Suspense>
+          </div>
+        </div>
+      </section>
 
-      <header className="mb-8">
-        <h1 className="font-heading text-xl font-semibold tracking-[-0.02em]">Sammenlign partier</h1>
-        <p className="mt-1.5 text-[13px] text-muted-foreground">
-          Vælg to partier og se afstemninger, hvor de var uenige
-        </p>
-      </header>
-
-      <Suspense fallback={null}>
-        <PartySelector selectedA={partyA} selectedB={partyB} />
-      </Suspense>
-
-      <div className="mt-6">
+      <div>
         {!bothSelected && (
-          <p className="text-sm text-muted-foreground">Vælg to partier ovenfor for at sammenligne.</p>
+          <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
+            <p className="text-sm text-muted-foreground">Vælg to partier ovenfor for at sammenligne.</p>
+          </div>
         )}
         {result && <ComparisonResult result={result} />}
       </div>
