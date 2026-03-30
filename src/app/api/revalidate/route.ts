@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const deleted = await kvDel("oda:v1:/Afstemning*")
+  const deleted = await kvDel("oda:*")
   revalidatePath("/", "layout")
 
   return NextResponse.json({ ok: true, keysDeleted: deleted })
