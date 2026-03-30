@@ -47,6 +47,22 @@ export default function RootLayout({
         <main id="main-content" className="min-h-[calc(100vh-3.5rem)] bg-background">
           {children}
         </main>
+        <footer className="border-t border-border/60 bg-background py-6">
+          <div className="mx-auto max-w-3xl px-4 text-center text-xs text-muted-foreground/60">
+            <p>
+              Data fra{" "}
+              <a
+                href="https://oda.ft.dk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline decoration-muted-foreground/30 hover:text-muted-foreground transition-colors"
+              >
+                Folketingets Åbne Data
+              </a>
+              {" "}(oda.ft.dk)
+            </p>
+          </div>
+        </footer>
       </body>
     </html>
   )

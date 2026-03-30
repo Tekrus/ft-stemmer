@@ -7,7 +7,11 @@ import { searchVotes } from "@/lib/actions/search"
 import type { VoteSummary } from "@/types/vote"
 import { VoteCard } from "./vote-card"
 
-export function SearchBar() {
+type Props = {
+  readonly suggestions?: readonly string[]
+}
+
+export function SearchBar({ suggestions = [] }: Props) {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<VoteSummary[]>([])
   const [hasSearched, setHasSearched] = useState(false)
@@ -33,6 +37,8 @@ export function SearchBar() {
     }, 300)
   }, [])
 
+  const showSuggestions = !hasSearched && !isPending && query.length === 0 && suggestions.length > 0
+
   return (
     <div className="space-y-6">
       <div className="relative">
@@ -46,6 +52,26 @@ export function SearchBar() {
         />
       </div>
 
+      {showSuggestions && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+            Prøv at søge efter
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {suggestions.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => handleChange(s)}
+                className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {isPending && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -56,7 +82,7 @@ export function SearchBar() {
       {hasSearched && !isPending && results.length === 0 && (
         <div className="rounded-xl border border-border bg-card p-8 text-center shadow-card">
           <p className="text-sm text-muted-foreground">
-            Ingen resultater for "{query}"
+            Ingen resultater for &ldquo;{query}&rdquo;
           </p>
           <p className="mt-1 text-xs text-muted-foreground/60">Prøv at justere din søgning</p>
         </div>

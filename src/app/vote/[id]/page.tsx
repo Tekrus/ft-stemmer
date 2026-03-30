@@ -70,7 +70,7 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
       {/* Vote hero card */}
       <header className="animate-fade-up mb-10 rounded-xl border border-border bg-card shadow-elevated overflow-hidden">
         {/* Result banner */}
-        <div className={`px-6 py-3 flex items-center justify-between ${
+        <div className={`px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:px-6 ${
           vote.passed
             ? "bg-green-50 border-b border-green-100 dark:bg-green-950/20 dark:border-green-900/30"
             : "bg-red-50 border-b border-red-100 dark:bg-red-950/20 dark:border-red-900/30"

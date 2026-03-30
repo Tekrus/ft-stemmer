@@ -16,7 +16,7 @@ export function PartyTable({ partyVotes }: Props) {
           <TableHead className="w-[180px]">Parti</TableHead>
           <TableHead className="text-right w-16">For</TableHead>
           <TableHead className="text-right w-16">Imod</TableHead>
-          <TableHead className="text-right w-20">Hv. for/imod</TableHead>
+          <TableHead className="text-right w-20 hidden sm:table-cell">Hverken</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -51,7 +51,7 @@ export function PartyTable({ partyVotes }: Props) {
               <TableCell className="text-right py-3 font-mono tabular-nums text-sm">
                 {p.against > 0 ? <span className="text-red-700 dark:text-red-400 font-semibold">{p.against}</span> : <span className="text-muted-foreground/40">—</span>}
               </TableCell>
-              <TableCell className="text-right py-3 font-mono tabular-nums text-sm text-muted-foreground">
+              <TableCell className="text-right py-3 font-mono tabular-nums text-sm text-muted-foreground hidden sm:table-cell">
                 {p.abstained > 0 ? p.abstained : <span className="text-muted-foreground/40">—</span>}
               </TableCell>
             </TableRow>

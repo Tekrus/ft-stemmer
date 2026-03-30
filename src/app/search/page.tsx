@@ -1,5 +1,14 @@
 import { SearchBar } from "@/components/search-bar"
 
+const SEARCH_SUGGESTIONS = [
+  "folkepension",
+  "klima",
+  "udlændinge",
+  "skat",
+  "sundhed",
+  "bolig",
+]
+
 export default function SearchPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 pb-16 pt-8">
@@ -10,7 +19,7 @@ export default function SearchPage() {
             Find afstemninger om lovforslag i Folketinget
           </p>
           <div className="mt-4">
-            <SearchBar />
+            <SearchBar suggestions={SEARCH_SUGGESTIONS} />
           </div>
         </div>
       </section>

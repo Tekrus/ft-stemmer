@@ -74,7 +74,7 @@ function SelectorRow({ label, selected, excludedAbbr, onSelect }: SelectorRowPro
   return (
     <div>
       <span className="mb-1.5 block text-xs font-medium text-muted-foreground">{label}</span>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="grid grid-cols-4 gap-1.5 sm:flex sm:flex-wrap">
         {parties.map(([abbr, { color }]) => {
           const isSelected = selected === abbr
           const isDisabled = excludedAbbr === abbr
