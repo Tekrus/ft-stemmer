@@ -1,18 +1,18 @@
 import type { PartyInfo } from "@/types/vote"
 
 export const PARTY_MAP: Readonly<Record<string, { name: string; color: string }>> = {
-  S:   { name: "Socialdemokratiet", color: "#E31836" },
-  V:   { name: "Venstre", color: "#003F87" },
-  SF:  { name: "SF", color: "#00A651" },
-  EL:  { name: "Enhedslisten", color: "#E31E24" },
-  M:   { name: "Moderaterne", color: "#6C2DC7" },
-  DD:  { name: "Danmarksdemokraterne", color: "#6A1B9A" },
-  LA:  { name: "Liberal Alliance", color: "#00AEEF" },
-  KF:  { name: "Det Konservative Folkeparti", color: "#00563F" },
-  DF:  { name: "Dansk Folkeparti", color: "#FFD100" },
-  RV:  { name: "Radikale Venstre", color: "#B0006D" },
-  ALT: { name: "Alternativet", color: "#00A651" },
-  NB:  { name: "Nye Borgerlige", color: "#00205B" },
+  S:   { name: "Socialdemokratiet", color: "#A82720" },
+  V:   { name: "Venstre", color: "#264264" },
+  SF:  { name: "SF", color: "#E07EA7" },
+  EL:  { name: "Enhedslisten", color: "#E5801B" },
+  M:   { name: "Moderaterne", color: "#B48BD2" },
+  DD:  { name: "Danmarksdemokraterne", color: "#7896D2" },
+  LA:  { name: "Liberal Alliance", color: "#3EB2BE" },
+  KF:  { name: "Det Konservative Folkeparti", color: "#95B226" },
+  DF:  { name: "Dansk Folkeparti", color: "#EAC73E" },
+  RV:  { name: "Radikale Venstre", color: "#733280" },
+  ALT: { name: "Alternativet", color: "#2B8738" },
+  NB:  { name: "Nye Borgerlige", color: "#00434f" },
 }
 
 const FALLBACK_COLOR = "#6b7280"
