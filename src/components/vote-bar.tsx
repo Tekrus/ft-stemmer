@@ -1,64 +1,33 @@
-import type { PartyVote } from "@/types/vote"
-
 type Props = {
-  readonly partyVotes: readonly PartyVote[]
   readonly totalFor: number
   readonly totalAgainst: number
 }
 
-export function VoteBar({ partyVotes, totalFor, totalAgainst }: Props) {
+export function VoteBar({ totalFor, totalAgainst }: Props) {
   const total = totalFor + totalAgainst
   if (total === 0) return null
 
-  const forParties = partyVotes.filter((p) => p.for > 0).sort((a, b) => b.for - a.for)
-  const againstParties = partyVotes.filter((p) => p.against > 0).sort((a, b) => b.against - a.against)
   const forPct = Math.round((totalFor / total) * 100)
 
   return (
     <div className="w-full">
-      <div className="flex h-8 w-full overflow-hidden rounded-lg" style={{ gap: "2px" }}>
-        {forParties.map((p) => (
-          <div
-            key={`for-${p.party}`}
-            className="group/seg relative h-full transition-all duration-300"
-            style={{
-              width: `${(p.for / total) * 100}%`,
-              backgroundColor: p.color,
-            }}
-            title={`${p.party}: ${p.for} for`}
-          >
-            {p.for / total > 0.08 && (
-              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white/90 opacity-0 group-hover/seg:opacity-100 transition-opacity">
-                {p.party}
-              </span>
-            )}
-          </div>
-        ))}
+      <div className="flex h-8 w-full overflow-hidden rounded-lg bg-muted/50">
+        <div
+          className="h-full rounded-l-lg bg-green-500 transition-all duration-300"
+          style={{ width: `${forPct}%` }}
+        />
         <div className="h-full w-0.5 bg-background" />
-        {againstParties.map((p) => (
-          <div
-            key={`against-${p.party}`}
-            className="group/seg relative h-full opacity-55 transition-all duration-300"
-            style={{
-              width: `${(p.against / total) * 100}%`,
-              backgroundColor: p.color,
-            }}
-            title={`${p.party}: ${p.against} imod`}
-          >
-            {p.against / total > 0.08 && (
-              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white/70 opacity-0 group-hover/seg:opacity-100 transition-opacity">
-                {p.party}
-              </span>
-            )}
-          </div>
-        ))}
+        <div
+          className="h-full rounded-r-lg bg-red-400 transition-all duration-300"
+          style={{ width: `${100 - forPct}%` }}
+        />
       </div>
       <div className="mt-2 flex justify-between font-mono text-xs tabular-nums text-muted-foreground">
         <span>
-          For: <span className="font-semibold text-foreground">{totalFor}</span> ({forPct}%)
+          For: <span className="font-semibold text-green-700 dark:text-green-400">{totalFor}</span> ({forPct}%)
         </span>
         <span>
-          Imod: <span className="font-semibold text-foreground">{totalAgainst}</span> ({100 - forPct}%)
+          Imod: <span className="font-semibold text-red-700 dark:text-red-400">{totalAgainst}</span> ({100 - forPct}%)
         </span>
       </div>
     </div>

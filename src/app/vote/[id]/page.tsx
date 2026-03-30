@@ -182,7 +182,6 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
           </h2>
           <div className="rounded-xl border border-border bg-card p-5 shadow-card">
             <VoteBar
-              partyVotes={vote.partyVotes}
               totalFor={vote.totals.for}
               totalAgainst={vote.totals.against}
             />

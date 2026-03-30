@@ -36,7 +36,6 @@ export function VoteCard({ vote }: Props) {
           <VoteSplitBar
             totalFor={vote.totals.for}
             totalAgainst={vote.totals.against}
-            partyVotes={vote.partyVotes}
           />
         </div>
 
