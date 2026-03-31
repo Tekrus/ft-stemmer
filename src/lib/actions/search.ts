@@ -26,7 +26,7 @@ export async function searchVotes(query: string, skip = 0): Promise<VoteSummary[
     async (afstemning) => {
       const sagstrin = afstemning.Sagstrin ?? null
       const sag = sagstrin?.Sag ?? null
-      const { partyVotes, totals } = await fetchPartyVotes(afstemning.id)
+      const { partyVotes, totals } = await fetchPartyVotes(afstemning.id, afstemning.konklusion)
 
       return mapToVoteSummary(
         afstemning,

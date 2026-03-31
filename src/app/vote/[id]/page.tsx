@@ -2,9 +2,9 @@ import { Suspense } from "react"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, ExternalLink, CheckCircle2, XCircle } from "lucide-react"
-import { fetchAfstemning, fetchSagstrin, fetchSag, fetchStemmerRaw, fetchPeriode } from "@/lib/oda/client"
-import { mapToVoteSummary, mapStemmeToPartyVotes } from "@/lib/oda/mapper"
-import { kvGet, kvSet } from "@/lib/kv/client"
+import { fetchAfstemning, fetchSagstrin, fetchSag, fetchPeriode } from "@/lib/oda/client"
+import { mapToVoteSummary } from "@/lib/oda/mapper"
+import { fetchPartyVotes } from "@/lib/oda/fetch-votes"
 import { AISummary } from "@/components/ai-summary"
 import { AFSTEMNINGSTYPE_MAP } from "@/lib/oda/constants"
 import { VoteBar } from "@/components/vote-bar"
@@ -33,13 +33,7 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
     : null
   const sag = sagstrin ? await fetchSag(sagstrin.sagid) : null
 
-  const pvKey = `partyvotes:${afstemning.id}`
-  let pvCached = await kvGet<{ partyVotes: import("@/types/vote").PartyVote[]; totals: import("@/types/vote").VoteTotals }>(pvKey)
-  if (!pvCached) {
-    const stemmerResponse = await fetchStemmerRaw(afstemning.id)
-    pvCached = mapStemmeToPartyVotes(stemmerResponse.value)
-    await kvSet(pvKey, pvCached, 0)
-  }
+  const { partyVotes, totals } = await fetchPartyVotes(afstemning.id, afstemning.konklusion)
 
   let periodeKode: string | null = null
   if (sag) {
@@ -50,7 +44,7 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
   }
 
   const vote = mapToVoteSummary(
-    afstemning, sagstrin, sag, pvCached.partyVotes, pvCached.totals,
+    afstemning, sagstrin, sag, partyVotes, totals,
     AFSTEMNINGSTYPE_MAP[afstemning.typeid] ?? "Ukendt",
     periodeKode
   )
@@ -202,15 +196,17 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
           </div>
         </section>
 
-        {/* Party table */}
-        <section className="animate-fade-up" style={{ animationDelay: "200ms" }}>
-          <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
-            Partier
-          </h2>
-          <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
-            <PartyTable partyVotes={vote.partyVotes} />
-          </div>
-        </section>
+        {/* Party table — hidden when individual Stemme records are unavailable */}
+        {vote.partyVotes.length > 0 && (
+          <section className="animate-fade-up" style={{ animationDelay: "200ms" }}>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+              Partier
+            </h2>
+            <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
+              <PartyTable partyVotes={vote.partyVotes} />
+            </div>
+          </section>
+        )}
 
         {/* Conclusion */}
         <section className="animate-fade-up pb-4" style={{ animationDelay: "250ms" }}>

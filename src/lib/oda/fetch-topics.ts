@@ -138,7 +138,7 @@ export async function fetchTopicVotes(
   const votes = await pMap(
     data.value,
     async (afstemning) => {
-      const { partyVotes, totals } = await fetchPartyVotes(afstemning.id)
+      const { partyVotes, totals } = await fetchPartyVotes(afstemning.id, afstemning.konklusion)
 
       const sagstrin = afstemning.Sagstrin ?? null
       const sag = sagstrin?.Sag ?? null

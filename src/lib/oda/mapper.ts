@@ -3,6 +3,29 @@ import { STEMMETYPE } from "./constants"
 import type { PartyVote, VoteSummary, VoteTotals } from "@/types/vote"
 import { getPartyInfo } from "@/lib/parties"
 
+/**
+ * Parse vote totals from the konklusion text when individual Stemme records
+ * are unavailable in the ODA API.
+ */
+export function parseTotalsFromKonklusion(konklusion: string): VoteTotals | null {
+  const forMatch = konklusion.match(/For stemte (\d+)/)
+  const againstMatch = konklusion.match(/imod stemte (\d+)/)
+  const abstainedMatch = konklusion.match(/hverken for eller imod stemte (\d+)/)
+  if (!forMatch || !againstMatch) return null
+
+  const forCount = Number(forMatch[1])
+  const againstCount = Number(againstMatch[1])
+  const abstainedCount = abstainedMatch ? Number(abstainedMatch[1]) : 0
+
+  return {
+    for: forCount,
+    against: againstCount,
+    absent: 0,
+    abstained: abstainedCount,
+    total: forCount + againstCount + abstainedCount,
+  }
+}
+
 export function extractPartyFromBiografi(
   biografi: string | null
 ): { party: string; partyShortname: string } | null {

@@ -1,5 +1,5 @@
 import { fetchFromOda, fetchStemmerRaw, fetchPeriode } from "./client"
-import { mapToVoteSummary, mapStemmeToPartyVotes } from "./mapper"
+import { mapToVoteSummary, mapStemmeToPartyVotes, parseTotalsFromKonklusion } from "./mapper"
 import { AFSTEMNINGSTYPE_MAP } from "./constants"
 import { pMap } from "@/lib/pmap"
 import { kvGet, kvSet } from "@/lib/kv/client"
@@ -18,13 +18,34 @@ type CachedPartyVotes = {
  * Raw Stemme+Aktør data is NOT cached (too large). Instead we fetch it,
  * process it into PartyVote[], and cache just that (~1-2KB vs ~100KB+).
  */
-export async function fetchPartyVotes(afstemningId: number): Promise<CachedPartyVotes> {
+export async function fetchPartyVotes(afstemningId: number, konklusion?: string | null): Promise<CachedPartyVotes> {
   const key = `partyvotes:${afstemningId}`
   const cached = await kvGet<CachedPartyVotes>(key)
-  if (cached) return cached
+
+  if (cached) {
+    // Re-derive totals from konklusion when stale cache has zero vote data
+    const hasNoTotals = !cached.totals.for && !cached.totals.against
+    if (hasNoTotals && konklusion) {
+      const parsed = parseTotalsFromKonklusion(konklusion)
+      if (parsed) {
+        const updated = { ...cached, totals: parsed }
+        await kvSet(key, updated, 0)
+        return updated
+      }
+    }
+    return cached
+  }
 
   const stemmerResponse = await fetchStemmerRaw(afstemningId)
-  const result = mapStemmeToPartyVotes(stemmerResponse.value)
+  let result = mapStemmeToPartyVotes(stemmerResponse.value)
+
+  // Fallback: when individual Stemme records are missing, parse totals from konklusion
+  if (result.totals.total === 0 && konklusion) {
+    const parsed = parseTotalsFromKonklusion(konklusion)
+    if (parsed) {
+      result = { ...result, totals: parsed }
+    }
+  }
 
   await kvSet(key, result, 0)
   return result
@@ -94,7 +115,7 @@ export async function fetchVoteSummaries(top: number, skip = 0): Promise<VoteSum
     async (afstemning) => {
       const sagstrin = afstemning.Sagstrin ?? null
       const sag = sagstrin?.Sag ?? null
-      const { partyVotes, totals } = await fetchPartyVotes(afstemning.id)
+      const { partyVotes, totals } = await fetchPartyVotes(afstemning.id, afstemning.konklusion)
       const periodeKode = sag ? await getPeriodeKode(sag.periodeid) : null
 
       return mapToVoteSummary(
