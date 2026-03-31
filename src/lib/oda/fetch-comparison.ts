@@ -108,7 +108,7 @@ export async function fetchComparisonVotes(
   let exhausted = false
 
   for (let batch = 0; batch < MAX_SCAN_BATCHES; batch++) {
-    const votes = await fetchVoteSummaries(BATCH_SIZE, currentSkip)
+    const { votes } = await fetchVoteSummaries(BATCH_SIZE, currentSkip)
 
     if (votes.length === 0) {
       exhausted = true

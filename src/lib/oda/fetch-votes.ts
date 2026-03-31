@@ -45,13 +45,51 @@ async function getPeriodeKode(periodeid: number): Promise<string | null> {
   }
 }
 
-export async function fetchVoteSummaries(top: number, skip = 0): Promise<VoteSummary[]> {
-  // Single query with $expand fetches Afstemning + Sagstrin + Sag in one request
+export type VoteCountByStatus = {
+  readonly total: number
+  readonly vedtaget: number
+  readonly forkastet: number
+}
+
+async function fetchVoteCount(filter?: string): Promise<number> {
+  const filterParam = filter ? `&$filter=${filter}` : ""
   const response = await fetchFromOda<OdaResponse<OdaAfstemning>>(
-    `/Afstemning?$top=${top}&$skip=${skip}&$orderby=opdateringsdato desc&$expand=Sagstrin/Sag`
+    `/Afstemning?$top=0&$inlinecount=allpages${filterParam}`
+  )
+  return response["odata.count"] != null
+    ? parseInt(response["odata.count"], 10)
+    : 0
+}
+
+export async function fetchVoteCountByStatus(): Promise<VoteCountByStatus> {
+  const [total, vedtaget] = await Promise.all([
+    fetchVoteCount(),
+    fetchVoteCount("vedtaget eq true"),
+  ])
+  return {
+    total,
+    vedtaget,
+    forkastet: total - vedtaget,
+  }
+}
+
+export type VoteSummariesResult = {
+  readonly votes: VoteSummary[]
+  readonly totalCount: number | null
+}
+
+export async function fetchVoteSummaries(top: number, skip = 0): Promise<VoteSummariesResult> {
+  // Single query with $expand fetches Afstemning + Sagstrin + Sag in one request
+  // $inlinecount=allpages returns the total count of matching records
+  const response = await fetchFromOda<OdaResponse<OdaAfstemning>>(
+    `/Afstemning?$top=${top}&$skip=${skip}&$orderby=opdateringsdato desc&$expand=Sagstrin/Sag&$inlinecount=allpages`
   )
 
-  return pMap(
+  const totalCount = response["odata.count"] != null
+    ? parseInt(response["odata.count"], 10)
+    : null
+
+  const votes = await pMap(
     response.value,
     async (afstemning) => {
       const sagstrin = afstemning.Sagstrin ?? null
@@ -71,4 +109,6 @@ export async function fetchVoteSummaries(top: number, skip = 0): Promise<VoteSum
     },
     FETCH_CONCURRENCY
   )
+
+  return { votes, totalCount }
 }

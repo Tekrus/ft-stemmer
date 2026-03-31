@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { fetchVoteSummaries } from "@/lib/oda/fetch-votes"
+import { fetchVoteSummaries, fetchVoteCountByStatus } from "@/lib/oda/fetch-votes"
 import { fetchFromOda } from "@/lib/oda/client"
 import { config } from "@/lib/config"
 import { PARTY_MAP } from "@/lib/parties"
@@ -23,9 +23,10 @@ async function getCurrentPeriodeName(): Promise<string | null> {
 }
 
 export default async function DashboardPage() {
-  const [votes, periodeName] = await Promise.all([
+  const [{ votes }, periodeName, statusCounts] = await Promise.all([
     fetchVoteSummaries(config.pagination.defaultPageSize),
     getCurrentPeriodeName(),
+    fetchVoteCountByStatus(),
   ])
 
   return (
@@ -74,7 +75,7 @@ export default async function DashboardPage() {
         <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Afstemninger
         </h2>
-        <DashboardVoteList votes={votes} />
+        <DashboardVoteList votes={votes} statusCounts={statusCounts} />
       </section>
 
       {/* Parties */}

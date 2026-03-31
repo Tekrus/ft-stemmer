@@ -5,5 +5,6 @@ import type { VoteSummary } from "@/types/vote"
 import { config } from "@/lib/config"
 
 export async function loadMoreVotes(skip: number): Promise<VoteSummary[]> {
-  return fetchVoteSummaries(config.pagination.defaultPageSize, skip)
+  const { votes } = await fetchVoteSummaries(config.pagination.defaultPageSize, skip)
+  return votes
 }

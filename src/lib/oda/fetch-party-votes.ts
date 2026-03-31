@@ -23,7 +23,7 @@ function getPartyStance(vote: VoteSummary, partyAbbr: string): PartyVoteCategory
 }
 
 export async function fetchPartyVotes(partyAbbr: string, count = 15): Promise<CategorizedVotes> {
-  const votes = await fetchVoteSummaries(count)
+  const { votes } = await fetchVoteSummaries(count)
 
   const result: {
     passed: { votedFor: VoteSummary[]; votedAgainst: VoteSummary[] }

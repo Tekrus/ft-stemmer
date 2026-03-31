@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
   if (cached) return Response.json(cached)
 
   // Fetch the 15 most recent afstemninger
-  const voteSummaries = await fetchVoteSummaries(15)
+  const { votes: voteSummaries } = await fetchVoteSummaries(15)
   const afstemningIds = voteSummaries.map((v) => v.id)
 
   // For each afstemning, fetch all Stemme records with Aktør expansion

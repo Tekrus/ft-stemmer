@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { VoteCard } from "./vote-card"
 import { LoadMoreButton } from "./load-more-button"
 import type { VoteSummary } from "@/types/vote"
+import type { VoteCountByStatus } from "@/lib/oda/fetch-votes"
 
 type SagType = "alle" | "lovforslag" | "beslutningsforslag" | "andre"
 
@@ -21,9 +22,10 @@ function filterByType(votes: readonly VoteSummary[], sagType: SagType): readonly
 
 type Props = {
   readonly votes: readonly VoteSummary[]
+  readonly statusCounts: VoteCountByStatus
 }
 
-export function DashboardVoteList({ votes }: Props) {
+export function DashboardVoteList({ votes, statusCounts }: Props) {
   const [sagType, setSagType] = useState<SagType>("alle")
 
   const vedtaget = useMemo(() => votes.filter((v) => v.passed), [votes])
@@ -51,13 +53,13 @@ export function DashboardVoteList({ votes }: Props) {
     <Tabs defaultValue="alle">
       <TabsList variant="line" className="w-full border-b border-border">
         <TabsTrigger value="alle" className="flex-1 text-xs font-medium uppercase tracking-wide">
-          Alle ({typeCounts.all[sagType]})
+          Alle ({sagType === "alle" ? statusCounts.total : typeCounts.all[sagType]})
         </TabsTrigger>
         <TabsTrigger value="vedtaget" className="flex-1 text-xs font-medium uppercase tracking-wide">
-          Vedtaget ({typeCounts.vedtaget[sagType]})
+          Vedtaget ({sagType === "alle" ? statusCounts.vedtaget : typeCounts.vedtaget[sagType]})
         </TabsTrigger>
         <TabsTrigger value="forkastet" className="flex-1 text-xs font-medium uppercase tracking-wide">
-          Forkastet ({typeCounts.forkastet[sagType]})
+          Forkastet ({sagType === "alle" ? statusCounts.forkastet : typeCounts.forkastet[sagType]})
         </TabsTrigger>
       </TabsList>
 

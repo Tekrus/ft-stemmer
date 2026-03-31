@@ -42,7 +42,7 @@ describe("fetchVoteSummaries", () => {
     vi.mocked(fetchSag).mockImplementation(async (id) => ({ id }))
     vi.mocked(fetchStemmerRaw).mockImplementation(async () => ({ value: [] }))
 
-    const results = await fetchVoteSummaries(3)
+    const { votes: results } = await fetchVoteSummaries(3)
 
     expect(results).toHaveLength(3)
     expect(results[0].id).toBe(1)
@@ -56,7 +56,7 @@ describe("fetchVoteSummaries", () => {
     })
     vi.mocked(fetchStemmerRaw).mockResolvedValueOnce({ value: [] })
 
-    const results = await fetchVoteSummaries(1)
+    const { votes: results } = await fetchVoteSummaries(1)
 
     expect(results).toHaveLength(1)
     expect(fetchSagstrin).not.toHaveBeenCalled()

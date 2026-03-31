@@ -68,6 +68,7 @@ export type OdaAktør = {
 
 export type OdaResponse<T> = {
   readonly "odata.metadata": string
+  readonly "odata.count"?: string
   readonly value: readonly T[]
 }
 
