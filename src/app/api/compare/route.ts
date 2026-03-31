@@ -15,6 +15,6 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const result = await fetchComparisonVotes(a, b, 5, skip)
+  const result = await fetchComparisonVotes(a, b, 10, skip)
   return Response.json(result)
 }

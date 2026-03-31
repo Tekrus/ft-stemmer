@@ -2,9 +2,13 @@
 
 import { useState, useCallback } from "react"
 import Link from "next/link"
-import type { ComparisonResult as ComparisonData, DisagreementVote } from "@/lib/oda/fetch-comparison"
+import { ChevronRight, ChevronDown } from "lucide-react"
+import type {
+  ComparisonResult as ComparisonData,
+  ComparedSag,
+  ComparedVote,
+} from "@/lib/oda/fetch-comparison"
 import { getPartyInfo } from "@/lib/parties"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { VoteStatusBadge } from "./vote-status-badge"
 import { PartyBadge } from "./party-badge"
 
@@ -13,15 +17,16 @@ type Props = {
 }
 
 export function ComparisonResult({ result }: Props) {
-  const [disagreements, setDisagreements] = useState<readonly DisagreementVote[]>(
-    result.disagreements
-  )
+  const [sager, setSager] = useState<readonly ComparedSag[]>(result.sager)
   const [totalScanned, setTotalScanned] = useState(result.totalScanned)
   const [loading, setLoading] = useState(false)
   const [exhausted, setExhausted] = useState(result.exhausted)
 
   const partyAInfo = getPartyInfo(result.partyA)
   const partyBInfo = getPartyInfo(result.partyB)
+
+  const agreements = sager.filter((s) => s.agrees)
+  const disagreements = sager.filter((s) => !s.agrees)
 
   const loadMore = useCallback(async () => {
     setLoading(true)
@@ -36,7 +41,11 @@ export function ComparisonResult({ result }: Props) {
 
       const batch: ComparisonData = await response.json()
 
-      setDisagreements((prev) => [...prev, ...batch.disagreements])
+      setSager((prev) => {
+        const seenNumbers = new Set(prev.map((s) => s.sagNumber))
+        const newSager = batch.sager.filter((s) => !seenNumbers.has(s.sagNumber))
+        return [...prev, ...newSager]
+      })
       setTotalScanned((prev) => prev + batch.totalScanned)
 
       if (batch.exhausted) {
@@ -49,60 +58,62 @@ export function ComparisonResult({ result }: Props) {
 
   return (
     <div>
-      <p className="mb-4 text-sm text-muted-foreground">
-        Uenige i{" "}
-        <span className="font-semibold text-foreground">{disagreements.length}</span>{" "}
-        af {totalScanned} afstemninger
-      </p>
+      <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+        <span>
+          <span className="font-semibold text-foreground">{sager.length}</span> forslag fundet
+        </span>
+        <span>
+          <span className="font-semibold text-red-600 dark:text-red-400">{disagreements.length}</span> uenige
+        </span>
+        <span>
+          <span className="font-semibold text-green-600 dark:text-green-400">{agreements.length}</span> enige
+        </span>
+      </div>
 
-      {disagreements.length === 0 && exhausted && (
-        <p className="text-sm text-muted-foreground">
-          Ingen uenigheder fundet i de seneste {totalScanned} afstemninger.
-        </p>
+      {sager.length === 0 && exhausted && (
+        <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            Ingen fælles afstemninger fundet i de seneste {totalScanned} afstemninger.
+          </p>
+        </div>
       )}
 
       {disagreements.length > 0 && (
-        <div className="space-y-3">
-          {disagreements.map(({ vote, stanceA, stanceB }) => (
-            <Link key={vote.id} href={`/vote/${vote.id}`}>
-              <Card className="transition-colors hover:bg-muted/30">
-                <CardHeader className="p-4 pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs tabular-nums text-muted-foreground">
-                        {vote.number}
-                      </span>
-                      <VoteStatusBadge passed={vote.passed} />
-                    </div>
-                    <time className="text-xs text-muted-foreground tabular-nums">
-                      {new Date(vote.date).toLocaleDateString("da-DK", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </time>
-                  </div>
-                  <CardTitle className="text-sm font-medium leading-snug">
-                    {vote.shortTitle || vote.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="px-4 pb-4 pt-0">
-                  <div className="flex flex-wrap items-center gap-3 text-xs">
-                    <StanceBadge
-                      partyInfo={partyAInfo}
-                      stance={stanceA}
-                    />
-                    <span className="text-muted-foreground">vs</span>
-                    <StanceBadge
-                      partyInfo={partyBInfo}
-                      stance={stanceB}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <section>
+          <h3 className="mb-3 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+            Uenige
+          </h3>
+          <div className="space-y-3">
+            {disagreements.map((sag, i) => (
+              <div
+                key={sag.sagNumber}
+                className="animate-fade-up"
+                style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
+              >
+                <SagCard sag={sag} partyAInfo={partyAInfo} partyBInfo={partyBInfo} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {agreements.length > 0 && (
+        <section className={disagreements.length > 0 ? "mt-8" : ""}>
+          <h3 className="mb-3 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+            Enige
+          </h3>
+          <div className="space-y-3">
+            {agreements.map((sag, i) => (
+              <div
+                key={sag.sagNumber}
+                className="animate-fade-up"
+                style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
+              >
+                <SagCard sag={sag} partyAInfo={partyAInfo} partyBInfo={partyBInfo} />
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       {!exhausted && (
@@ -110,12 +121,150 @@ export function ComparisonResult({ result }: Props) {
           type="button"
           disabled={loading}
           onClick={loadMore}
-          className="mt-4 w-full rounded border border-input px-4 py-2.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+          className="mt-6 w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 disabled:opacity-50"
         >
-          {loading ? "Henter flere afstemninger…" : "Hent flere afstemninger"}
+          {loading ? "Henter flere forslag…" : "Hent flere forslag"}
         </button>
       )}
     </div>
+  )
+}
+
+type SagCardProps = {
+  readonly sag: ComparedSag
+  readonly partyAInfo: { abbreviation: string; color: string }
+  readonly partyBInfo: { abbreviation: string; color: string }
+}
+
+function SagCard({ sag, partyAInfo, partyBInfo }: SagCardProps) {
+  const [expanded, setExpanded] = useState(false)
+  const primaryVote = sag.votes[0]
+  const hasMultipleVotes = sag.votes.length > 1
+
+  return (
+    <article className="rounded-xl border border-border bg-card shadow-card transition-all duration-200 hover:shadow-card-hover">
+      {/* Main card — links to the primary (most recent) vote */}
+      <Link href={`/vote/${primaryVote.vote.id}`} className="group block p-4 sm:p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="font-mono text-xs tabular-nums text-muted-foreground">
+                {sag.sagNumber}
+              </span>
+              <VoteStatusBadge passed={primaryVote.vote.passed} />
+              <span className="text-[11px] text-muted-foreground">·</span>
+              <time className="text-[11px] text-muted-foreground tabular-nums font-mono">
+                {new Date(primaryVote.vote.date).toLocaleDateString("da-DK", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </time>
+            </div>
+            <h3 className="text-[15px] font-medium leading-snug tracking-[-0.01em] line-clamp-2 group-hover:text-dannebrog transition-colors duration-200">
+              {sag.shortTitle || sag.title}
+            </h3>
+          </div>
+          <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
+        </div>
+
+        <div className="mt-3 pt-3 border-t border-border/50">
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            <StanceBadge partyInfo={partyAInfo} stance={primaryVote.stanceA} />
+            <span className="text-muted-foreground">vs</span>
+            <StanceBadge partyInfo={partyBInfo} stance={primaryVote.stanceB} />
+            {primaryVote.vote.type && (
+              <>
+                <span className="text-muted-foreground">·</span>
+                <span className="text-muted-foreground">{primaryVote.vote.type}</span>
+              </>
+            )}
+          </div>
+        </div>
+      </Link>
+
+      {/* Expandable sub-votes */}
+      {hasMultipleVotes && (
+        <div className="border-t border-border/50">
+          <button
+            type="button"
+            onClick={() => setExpanded((prev) => !prev)}
+            className="flex w-full items-center gap-1.5 px-4 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground sm:px-5"
+          >
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            />
+            {sag.votes.length} afstemninger på dette forslag
+          </button>
+
+          {expanded && (
+            <div className="px-4 pb-3 sm:px-5">
+              <div className="space-y-2">
+                {sag.votes.map((item) => (
+                  <SubVoteRow
+                    key={item.vote.id}
+                    item={item}
+                    partyAInfo={partyAInfo}
+                    partyBInfo={partyBInfo}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </article>
+  )
+}
+
+type SubVoteRowProps = {
+  readonly item: ComparedVote
+  readonly partyAInfo: { abbreviation: string; color: string }
+  readonly partyBInfo: { abbreviation: string; color: string }
+}
+
+function SubVoteRow({ item, partyAInfo, partyBInfo }: SubVoteRowProps) {
+  const { vote, stanceA, stanceB, agrees } = item
+  return (
+    <Link
+      href={`/vote/${vote.id}`}
+      className="group/sub flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-muted/30 px-3 py-2 transition-colors hover:bg-muted/60"
+    >
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-foreground">
+            {vote.type || "Afstemning"}
+          </span>
+          <span className={`text-[11px] font-semibold uppercase ${agrees ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}>
+            {agrees ? "Enige" : "Uenige"}
+          </span>
+        </div>
+        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+          <time className="tabular-nums font-mono">
+            {new Date(vote.date).toLocaleDateString("da-DK", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </time>
+          <span>·</span>
+          <span className="inline-flex items-center gap-1">
+            <PartyBadge abbreviation={partyAInfo.abbreviation} color={partyAInfo.color} />
+            <span className={stanceA === "for" ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}>
+              {stanceA === "for" ? "For" : "Imod"}
+            </span>
+          </span>
+          <span>vs</span>
+          <span className="inline-flex items-center gap-1">
+            <PartyBadge abbreviation={partyBInfo.abbreviation} color={partyBInfo.color} />
+            <span className={stanceB === "for" ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}>
+              {stanceB === "for" ? "For" : "Imod"}
+            </span>
+          </span>
+        </div>
+      </div>
+      <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover/sub:translate-x-0.5" />
+    </Link>
   )
 }
 

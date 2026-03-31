@@ -34,7 +34,7 @@ export default async function ComparePage({ searchParams }: Props) {
         <div className="rounded-xl bg-card p-6 shadow-card">
           <h1 className="font-heading text-xl font-semibold tracking-[-0.02em]">Sammenlign partier</h1>
           <p className="mt-1.5 text-[13px] text-muted-foreground">
-            Vælg to partier og se afstemninger, hvor de var uenige
+            Vælg to partier og se hvordan de stemmer
           </p>
           <div className="mt-5">
             <Suspense fallback={null}>
