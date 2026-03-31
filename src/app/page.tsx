@@ -5,7 +5,6 @@ import { config } from "@/lib/config"
 import { PARTY_MAP } from "@/lib/parties"
 import { PartyBadge } from "@/components/party-badge"
 import { DashboardVoteList } from "@/components/dashboard-vote-list"
-import { VoteTimeline } from "@/components/vote-timeline"
 import type { OdaResponse, OdaPeriode } from "@/lib/oda/types"
 
 export const revalidate = 10800
@@ -63,11 +62,6 @@ export default async function DashboardPage() {
             </p>
           </div>
         </div>
-      </section>
-
-      {/* Vote timeline */}
-      <section className="mb-8 animate-fade-up" style={{ animationDelay: "50ms" }}>
-        <VoteTimeline votes={votes} />
       </section>
 
       {/* Vote list */}
