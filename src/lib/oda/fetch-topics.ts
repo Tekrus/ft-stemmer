@@ -17,11 +17,6 @@ type OdaEmneord = {
   readonly typeid: number
 }
 
-type OdaEmneordSag = {
-  readonly emneordid: number
-  readonly sagid: number
-}
-
 export type TopicInfo = {
   readonly id: number
   readonly name: string
@@ -47,6 +42,7 @@ function toSlug(emneord: string): string {
 
 /**
  * Fetch popular broad-policy topics (typeid=1), return top 20 by name.
+ * Deduplicates by slug, preferring the entry with the highest id (newest/active).
  * Cached at `popular-topics` with 3h TTL.
  */
 export async function fetchPopularTopics(): Promise<TopicInfo[]> {
@@ -55,14 +51,19 @@ export async function fetchPopularTopics(): Promise<TopicInfo[]> {
   if (cached) return cached
 
   const data = await fetchOdaRaw<OdaResponse<OdaEmneord>>(
-    `/Emneord?$filter=typeid eq 1&$top=20&$orderby=emneord asc`
+    `/Emneord?$filter=typeid eq 1&$top=40&$orderby=emneord asc`
   )
 
-  const topics: TopicInfo[] = data.value.map((e) => ({
-    id: e.id,
-    name: e.emneord,
-    slug: toSlug(e.emneord),
-  }))
+  const bySlug = new Map<string, TopicInfo>()
+  for (const e of data.value) {
+    const slug = toSlug(e.emneord)
+    const existing = bySlug.get(slug)
+    if (!existing || e.id > existing.id) {
+      bySlug.set(slug, { id: e.id, name: e.emneord, slug })
+    }
+  }
+
+  const topics = [...bySlug.values()].slice(0, 20)
 
   await kvSet(cacheKey, topics, TOPIC_TTL)
   return topics
@@ -70,25 +71,31 @@ export async function fetchPopularTopics(): Promise<TopicInfo[]> {
 
 /**
  * Look up an Emneord by its slug (lowercased emneord with spaces replaced by hyphens).
- * Fetches all typeid=1 emneord (cached), then matches by slug.
- * Returns null if not found.
+ * Uses ODA substringof filter to search, then matches exact slug.
+ * When multiple emneord share the same slug, picks the highest id (newest/active).
  */
 export async function fetchEmneordBySlug(slug: string): Promise<{ id: number; name: string } | null> {
-  const cacheKey = "all-emneord-t1"
-  let allEmneord = await kvGet<readonly OdaEmneord[]>(cacheKey)
+  const cacheKey = `emneord-slug:${slug}`
+  const cached = await kvGet<{ id: number; name: string }>(cacheKey)
+  if (cached) return cached
 
-  if (!allEmneord) {
-    const data = await fetchOdaRaw<OdaResponse<OdaEmneord>>(
-      `/Emneord?$filter=typeid eq 1&$top=100`
-    )
-    allEmneord = data.value
-    await kvSet(cacheKey, allEmneord, TOPIC_TTL)
-  }
+  const searchTerm = slug.replace(/-/g, " ")
+  const data = await fetchOdaRaw<OdaResponse<OdaEmneord>>(
+    `/Emneord?$filter=substringof('${encodeURIComponent(searchTerm)}',emneord)&$top=50`
+  )
 
-  const match = allEmneord.find((e) => toSlug(e.emneord) === slug)
-  if (!match) return null
+  const matches = data.value.filter((e) => toSlug(e.emneord) === slug)
+  if (matches.length === 0) return null
 
-  return { id: match.id, name: match.emneord }
+  // Prefer typeid=1 (broad policy), then highest id (newest/active)
+  const best = matches.sort((a, b) => {
+    if (a.typeid === 1 && b.typeid !== 1) return -1
+    if (a.typeid !== 1 && b.typeid === 1) return 1
+    return b.id - a.id
+  })[0]
+  const result = { id: best.id, name: best.emneord }
+  await kvSet(cacheKey, result, TOPIC_TTL)
+  return result
 }
 
 /** Cache periodeKode lookups in-memory within a single request */
@@ -108,12 +115,10 @@ async function getPeriodeKode(periodeid: number): Promise<string | null> {
 
 /**
  * Fetch votes for a given emneord.
- * Steps:
- *   1. Fetch EmneordSag links (uncached)
- *   2. For each sagid, fetch the most recent Afstemning with Sagstrin/Sag expand (uncached)
- *   3. Fetch party votes via fetchPartyVotes (has its own cache)
- *   4. Map to VoteSummary
- * The processed page is cached at `topic:${emneordId}:skip=${skip}` with 3h TTL.
+ * Queries Afstemning directly via OData `any()` filter through the
+ * Sagstrin→Sag→EmneordSag navigation, so only Sag records that
+ * actually have votes are returned.
+ * Cached at `topic:${emneordId}:skip=${skip}` with 3h TTL.
  */
 export async function fetchTopicVotes(
   emneordId: number,
@@ -124,32 +129,21 @@ export async function fetchTopicVotes(
   const cached = await kvGet<{ votes: VoteSummary[]; exhausted: boolean }>(cacheKey)
   if (cached) return cached
 
-  // Step 1: Fetch EmneordSag links
-  const emneordSagData = await fetchOdaRaw<OdaResponse<OdaEmneordSag>>(
-    `/EmneordSag?$filter=emneordid eq ${emneordId}&$top=${top}&$skip=${skip}&$orderby=sagid desc`
+  const data = await fetchOdaRaw<OdaResponse<OdaAfstemning>>(
+    `/Afstemning?$filter=Sagstrin/Sag/EmneordSag/any(e: e/emneordid eq ${emneordId})&$top=${top}&$skip=${skip}&$orderby=opdateringsdato desc&$expand=Sagstrin/Sag`
   )
 
-  const exhausted = emneordSagData.value.length < top
+  const exhausted = data.value.length < top
 
-  // Step 2: For each sagid, fetch most recent Afstemning
   const votes = await pMap(
-    emneordSagData.value,
-    async (link) => {
-      const afstemningData = await fetchOdaRaw<OdaResponse<OdaAfstemning>>(
-        `/Afstemning?$filter=Sagstrin/sagid eq ${link.sagid}&$top=1&$orderby=opdateringsdato desc&$expand=Sagstrin/Sag`
-      )
-
-      const afstemning = afstemningData.value[0]
-      if (!afstemning) return null
-
-      // Step 3: Fetch party votes (cached in Redis)
+    data.value,
+    async (afstemning) => {
       const { partyVotes, totals } = await fetchPartyVotes(afstemning.id)
 
       const sagstrin = afstemning.Sagstrin ?? null
       const sag = sagstrin?.Sag ?? null
       const periodeKode = sag ? await getPeriodeKode(sag.periodeid) : null
 
-      // Step 4: Map to VoteSummary
       return mapToVoteSummary(
         afstemning,
         sagstrin,
@@ -163,9 +157,7 @@ export async function fetchTopicVotes(
     FETCH_CONCURRENCY
   )
 
-  const filteredVotes = votes.filter((v): v is VoteSummary => v !== null)
-  const result = { votes: filteredVotes, exhausted }
-
+  const result = { votes, exhausted }
   await kvSet(cacheKey, result, TOPIC_TTL)
   return result
 }
