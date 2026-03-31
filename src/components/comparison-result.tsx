@@ -83,7 +83,7 @@ export function ComparisonResult({ result }: Props) {
     <Tabs defaultValue="all">
       <TabsList variant="line" className="w-full border-b border-border">
         <TabsTrigger value="all" className="flex-1 text-xs font-medium uppercase tracking-wide">
-          Alle ({sager.length})
+          Alle ({sager.length}{result.totalVotes != null ? ` af ${result.totalVotes}` : ""})
         </TabsTrigger>
         <TabsTrigger value="disagree" className="flex-1 text-xs font-medium uppercase tracking-wide">
           Uenige ({disagreements.length})

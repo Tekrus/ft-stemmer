@@ -7,16 +7,15 @@ import { searchVotes } from "@/lib/actions/search"
 import type { VoteSummary } from "@/types/vote"
 import { VoteCard } from "./vote-card"
 
-type Props = {
-  readonly suggestions?: readonly string[]
-}
-
-export function SearchBar({ suggestions = [] }: Props) {
+export function SearchBar() {
   const [query, setQuery] = useState("")
   const [results, setResults] = useState<VoteSummary[]>([])
   const [hasSearched, setHasSearched] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
   const [isPending, startTransition] = useTransition()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const loading = isSearching || isPending
 
   const handleChange = useCallback((value: string) => {
     setQuery(value)
@@ -25,19 +24,20 @@ export function SearchBar({ suggestions = [] }: Props) {
     if (value.trim().length < 2) {
       setResults([])
       setHasSearched(false)
+      setIsSearching(false)
       return
     }
 
+    setIsSearching(true)
     debounceRef.current = setTimeout(() => {
       startTransition(async () => {
         const votes = await searchVotes(value)
         setResults(votes)
         setHasSearched(true)
+        setIsSearching(false)
       })
     }, 300)
   }, [])
-
-  const showSuggestions = !hasSearched && !isPending && query.length === 0 && suggestions.length > 0
 
   return (
     <div className="space-y-6">
@@ -52,34 +52,14 @@ export function SearchBar({ suggestions = [] }: Props) {
         />
       </div>
 
-      {showSuggestions && (
-        <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
-            Prøv at søge efter
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {suggestions.map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => handleChange(s)}
-                className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {isPending && (
+      {loading && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
           Søger...
         </div>
       )}
 
-      {hasSearched && !isPending && results.length === 0 && (
+      {hasSearched && !loading && results.length === 0 && (
         <div className="rounded-xl border border-border bg-card p-8 text-center shadow-card">
           <p className="text-sm text-muted-foreground">
             Ingen resultater for &ldquo;{query}&rdquo;

@@ -6,15 +6,6 @@ import { fetchPopularTopics } from "@/lib/oda/fetch-topics"
 
 export const revalidate = 10800
 
-const SEARCH_SUGGESTIONS = [
-  "folkepension",
-  "klima",
-  "udlændinge",
-  "skat",
-  "sundhed",
-  "bolig",
-]
-
 export default async function SearchPage() {
   let topics: { id: number; name: string; slug: string }[] = []
   try {
@@ -33,7 +24,7 @@ export default async function SearchPage() {
           </p>
           <div className="mt-4">
             <SearchTabs
-              voteSearch={<SearchBar suggestions={SEARCH_SUGGESTIONS} />}
+              voteSearch={<SearchBar />}
               memberSearch={<MemberSearch />}
             />
           </div>

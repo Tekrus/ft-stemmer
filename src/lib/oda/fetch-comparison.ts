@@ -28,6 +28,7 @@ export type ComparisonResult = {
   readonly partyB: string
   readonly sager: readonly ComparedSag[]
   readonly totalScanned: number
+  readonly totalVotes: number | null
   readonly exhausted: boolean
 }
 
@@ -104,21 +105,26 @@ export async function fetchComparisonVotes(
 
   const sagGroups = new Map<string, ComparedVote[]>()
   let totalScanned = 0
+  let totalVotes: number | null = null
   let currentSkip = skip
   let exhausted = false
 
   for (let batch = 0; batch < MAX_SCAN_BATCHES; batch++) {
-    const { votes } = await fetchVoteSummaries(BATCH_SIZE, currentSkip)
+    const batchResult = await fetchVoteSummaries(BATCH_SIZE, currentSkip)
 
-    if (votes.length === 0) {
+    if (totalVotes === null && batchResult.totalCount !== null) {
+      totalVotes = batchResult.totalCount
+    }
+
+    if (batchResult.votes.length === 0) {
       exhausted = true
       break
     }
 
-    collectComparedVotes(votes, partyA, partyB, sagGroups)
-    totalScanned += votes.length
+    collectComparedVotes(batchResult.votes, partyA, partyB, sagGroups)
+    totalScanned += batchResult.votes.length
 
-    if (votes.length < BATCH_SIZE) {
+    if (batchResult.votes.length < BATCH_SIZE) {
       exhausted = true
       break
     }
@@ -127,7 +133,7 @@ export async function fetchComparisonVotes(
       break
     }
 
-    currentSkip += votes.length
+    currentSkip += batchResult.votes.length
   }
 
   const result: ComparisonResult = {
@@ -135,6 +141,7 @@ export async function fetchComparisonVotes(
     partyB,
     sager: buildSager(sagGroups),
     totalScanned,
+    totalVotes,
     exhausted,
   }
 
