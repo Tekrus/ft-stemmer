@@ -9,6 +9,8 @@ import { AISummary } from "@/components/ai-summary"
 import { AFSTEMNINGSTYPE_MAP } from "@/lib/oda/constants"
 import { VoteBar } from "@/components/vote-bar"
 import { PartyTable } from "@/components/party-table"
+import { VoteSponsors } from "@/components/vote-sponsors"
+import { VoteRelated } from "@/components/vote-related"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { OdaAfstemning } from "@/lib/oda/types"
 
@@ -116,7 +118,8 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
           <p className="mt-2 text-[13px] text-muted-foreground">
             {new Date(vote.date).toLocaleDateString("da-DK", { day: "numeric", month: "long", year: "numeric" })}
           </p>
-          {(vote.ftUrl || vote.retsinformationUrl) && (
+          {vote.sagId && <VoteSponsors sagId={vote.sagId} />}
+          {(vote.ftUrl || vote.retsinformationUrl || vote.debateUrl) && (
             <div className="mt-4 flex flex-wrap gap-3">
               {vote.ftUrl && (
                 <a
@@ -137,6 +140,17 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
                   className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                 >
                   retsinformation.dk
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
+              {vote.debateUrl && (
+                <a
+                  href={vote.debateUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                >
+                  Debat
                   <ExternalLink className="h-3 w-3" />
                 </a>
               )}
@@ -207,6 +221,11 @@ export default async function VoteDetailPage({ params }: { params: Promise<{ id:
             <p className="text-sm leading-relaxed whitespace-pre-line text-muted-foreground">{vote.conclusion}</p>
           </div>
         </section>
+
+        {/* Related proposals */}
+        {sagstrin && sag && (
+          <VoteRelated sagstrinId={sagstrin.id} sagId={sag.id} />
+        )}
       </div>
     </div>
   )

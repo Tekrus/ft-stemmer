@@ -1,15 +1,32 @@
 import Link from "next/link"
 import { fetchVoteSummaries } from "@/lib/oda/fetch-votes"
+import { fetchFromOda } from "@/lib/oda/client"
 import { config } from "@/lib/config"
 import { PARTY_MAP } from "@/lib/parties"
-import { VoteCard } from "@/components/vote-card"
 import { PartyBadge } from "@/components/party-badge"
-import { LoadMoreButton } from "@/components/load-more-button"
+import { DashboardVoteList } from "@/components/dashboard-vote-list"
+import { VoteTimeline } from "@/components/vote-timeline"
+import type { OdaResponse, OdaPeriode } from "@/lib/oda/types"
 
 export const revalidate = 10800
 
+async function getCurrentPeriodeName(): Promise<string | null> {
+  try {
+    const response = await fetchFromOda<OdaResponse<OdaPeriode>>(
+      "/Periode?$top=1&$orderby=startdato desc"
+    )
+    const periode = response.value[0]
+    return periode?.titel ?? null
+  } catch {
+    return null
+  }
+}
+
 export default async function DashboardPage() {
-  const votes = await fetchVoteSummaries(config.pagination.defaultPageSize)
+  const [votes, periodeName] = await Promise.all([
+    fetchVoteSummaries(config.pagination.defaultPageSize),
+    getCurrentPeriodeName(),
+  ])
 
   return (
     <div className="mx-auto max-w-3xl px-4 pb-16 pt-8">
@@ -35,6 +52,11 @@ export default async function DashboardPage() {
             <h1 className="font-heading text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
               Seneste afstemninger
             </h1>
+            {periodeName && (
+              <span className="mt-2 inline-block rounded-full border border-border bg-muted/50 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                {periodeName}
+              </span>
+            )}
             <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
               Hvad stemmer Folketinget om? Se de nyeste afstemninger her.
             </p>
@@ -42,25 +64,17 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      {/* Vote timeline */}
+      <section className="mb-8 animate-fade-up" style={{ animationDelay: "50ms" }}>
+        <VoteTimeline votes={votes} />
+      </section>
+
       {/* Vote list */}
       <section>
         <h2 className="mb-4 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Afstemninger
         </h2>
-        <div className="space-y-3">
-          {votes.map((vote, i) => (
-            <div
-              key={vote.id}
-              className="animate-fade-up"
-              style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
-            >
-              <VoteCard vote={vote} />
-            </div>
-          ))}
-        </div>
-        <div className="mt-6">
-          <LoadMoreButton initialCount={votes.length} />
-        </div>
+        <DashboardVoteList votes={votes} />
       </section>
 
       {/* Parties */}
