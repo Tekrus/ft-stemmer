@@ -42,7 +42,7 @@ async function fetchOdaRaw<T>(path: string): Promise<T> {
 }
 
 function toSlug(emneord: string): string {
-  return encodeURIComponent(emneord.toLowerCase())
+  return emneord.toLowerCase().replace(/\s+/g, "-")
 }
 
 /**
@@ -69,15 +69,26 @@ export async function fetchPopularTopics(): Promise<TopicInfo[]> {
 }
 
 /**
- * Look up an Emneord by its slug (the lowercased emneord string).
+ * Look up an Emneord by its slug (lowercased emneord with spaces replaced by hyphens).
+ * Fetches all typeid=1 emneord (cached), then matches by slug.
  * Returns null if not found.
  */
-export async function fetchEmneordBySlug(slug: string): Promise<OdaEmneord | null> {
-  const decoded = decodeURIComponent(slug)
-  const data = await fetchOdaRaw<OdaResponse<OdaEmneord>>(
-    `/Emneord?$filter=emneord eq '${decoded}'&$top=1`
-  )
-  return data.value[0] ?? null
+export async function fetchEmneordBySlug(slug: string): Promise<{ id: number; name: string } | null> {
+  const cacheKey = "all-emneord-t1"
+  let allEmneord = await kvGet<readonly OdaEmneord[]>(cacheKey)
+
+  if (!allEmneord) {
+    const data = await fetchOdaRaw<OdaResponse<OdaEmneord>>(
+      `/Emneord?$filter=typeid eq 1&$top=100`
+    )
+    allEmneord = data.value
+    await kvSet(cacheKey, allEmneord, TOPIC_TTL)
+  }
+
+  const match = allEmneord.find((e) => toSlug(e.emneord) === slug)
+  if (!match) return null
+
+  return { id: match.id, name: match.emneord }
 }
 
 /** Cache periodeKode lookups in-memory within a single request */

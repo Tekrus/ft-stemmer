@@ -38,7 +38,7 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
               </span>
             </div>
             <h1 className="font-heading text-2xl font-semibold tracking-[-0.03em] sm:text-3xl">
-              {emneord.emneord}
+              {emneord.name}
             </h1>
             <p className="mt-2 max-w-md text-[15px] leading-relaxed text-muted-foreground">
               Afstemninger relateret til dette emne i Folketinget.

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { PARTY_MAP, getPartyInfo } from "@/lib/parties"
 import { fetchPartyVotes } from "@/lib/oda/fetch-party-votes"
 import { PartyVoteList } from "@/components/party-vote-list"
+import { PartyLoyalty } from "@/components/party-loyalty"
 
 export const revalidate = 10800
 
@@ -54,6 +55,14 @@ export default async function PartyPage({ params }: { params: Promise<{ abbrevia
       </section>
 
       <PartyVoteList votes={votes} partyAbbr={abbr} />
+
+      {/* Medlemmer section — lazy-loaded */}
+      <section className="mt-10 animate-fade-up" style={{ animationDelay: "200ms" }}>
+        <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+          Medlemmer
+        </h2>
+        <PartyLoyalty partyAbbr={abbr} />
+      </section>
     </div>
   )
 }
