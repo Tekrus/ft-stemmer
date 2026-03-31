@@ -1,5 +1,6 @@
 export type VoteSummary = {
   readonly id: number
+  readonly sagId: number | null
   readonly number: string
   readonly title: string
   readonly shortTitle: string

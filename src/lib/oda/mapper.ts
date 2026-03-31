@@ -90,6 +90,7 @@ export function mapToVoteSummary(
 ): VoteSummary {
   return {
     id: afstemning.id,
+    sagId: sag?.id ?? null,
     number: sag?.nummer ?? "",
     title: sag?.titel ?? "",
     shortTitle: sag?.titelkort ?? "",

@@ -14,6 +14,7 @@ export type ComparedVote = {
 
 /** A legislative case (sag) with one or more procedural votes (afstemninger) */
 export type ComparedSag = {
+  readonly sagId: number | null
   readonly sagNumber: string
   readonly title: string
   readonly shortTitle: string
@@ -76,6 +77,7 @@ function buildSager(sagGroups: Map<string, ComparedVote[]>): ComparedSag[] {
     const representative = votes[0].vote
 
     return {
+      sagId: representative.sagId,
       sagNumber,
       title: representative.title,
       shortTitle: representative.shortTitle,

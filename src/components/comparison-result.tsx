@@ -2,13 +2,15 @@
 
 import { useState, useCallback } from "react"
 import Link from "next/link"
-import { ChevronRight, ChevronDown } from "lucide-react"
+import { ChevronRight, ChevronDown, FileText, ExternalLink } from "lucide-react"
 import type {
   ComparisonResult as ComparisonData,
   ComparedSag,
   ComparedVote,
 } from "@/lib/oda/fetch-comparison"
+import type { SagDocument } from "@/lib/oda/fetch-documents"
 import { getPartyInfo } from "@/lib/parties"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { VoteStatusBadge } from "./vote-status-badge"
 import { PartyBadge } from "./party-badge"
 
@@ -56,76 +58,85 @@ export function ComparisonResult({ result }: Props) {
     }
   }, [result.partyA, result.partyB, totalScanned])
 
-  return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-        <span>
-          <span className="font-semibold text-foreground">{sager.length}</span> forslag fundet
-        </span>
-        <span>
-          <span className="font-semibold text-red-600 dark:text-red-400">{disagreements.length}</span> uenige
-        </span>
-        <span>
-          <span className="font-semibold text-green-600 dark:text-green-400">{agreements.length}</span> enige
-        </span>
+  const loadMoreButton = !exhausted && (
+    <button
+      type="button"
+      disabled={loading}
+      onClick={loadMore}
+      className="mt-6 w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 disabled:opacity-50"
+    >
+      {loading ? "Henter flere forslag…" : "Hent flere forslag"}
+    </button>
+  )
+
+  if (sager.length === 0 && exhausted) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
+        <p className="text-sm text-muted-foreground">
+          Ingen fælles afstemninger fundet i de seneste {totalScanned} afstemninger.
+        </p>
       </div>
+    )
+  }
 
-      {sager.length === 0 && exhausted && (
-        <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            Ingen fælles afstemninger fundet i de seneste {totalScanned} afstemninger.
-          </p>
-        </div>
-      )}
+  return (
+    <Tabs defaultValue="all">
+      <TabsList variant="line" className="w-full border-b border-border">
+        <TabsTrigger value="all" className="flex-1 text-xs font-medium uppercase tracking-wide">
+          Alle ({sager.length})
+        </TabsTrigger>
+        <TabsTrigger value="disagree" className="flex-1 text-xs font-medium uppercase tracking-wide">
+          Uenige ({disagreements.length})
+        </TabsTrigger>
+        <TabsTrigger value="agree" className="flex-1 text-xs font-medium uppercase tracking-wide">
+          Enige ({agreements.length})
+        </TabsTrigger>
+      </TabsList>
 
-      {disagreements.length > 0 && (
-        <section>
-          <h3 className="mb-3 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
-            Uenige
-          </h3>
-          <div className="space-y-3">
-            {disagreements.map((sag, i) => (
-              <div
-                key={sag.sagNumber}
-                className="animate-fade-up"
-                style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
-              >
-                <SagCard sag={sag} partyAInfo={partyAInfo} partyBInfo={partyBInfo} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <TabsContent value="all" className="mt-4">
+        <SagList sager={sager} partyAInfo={partyAInfo} partyBInfo={partyBInfo} />
+        {loadMoreButton}
+      </TabsContent>
 
-      {agreements.length > 0 && (
-        <section className={disagreements.length > 0 ? "mt-8" : ""}>
-          <h3 className="mb-3 text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
-            Enige
-          </h3>
-          <div className="space-y-3">
-            {agreements.map((sag, i) => (
-              <div
-                key={sag.sagNumber}
-                className="animate-fade-up"
-                style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
-              >
-                <SagCard sag={sag} partyAInfo={partyAInfo} partyBInfo={partyBInfo} />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <TabsContent value="disagree" className="mt-4">
+        {disagreements.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Ingen uenige forslag fundet.</p>
+        ) : (
+          <SagList sager={disagreements} partyAInfo={partyAInfo} partyBInfo={partyBInfo} />
+        )}
+        {loadMoreButton}
+      </TabsContent>
 
-      {!exhausted && (
-        <button
-          type="button"
-          disabled={loading}
-          onClick={loadMore}
-          className="mt-6 w-full rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-muted-foreground shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5 disabled:opacity-50"
+      <TabsContent value="agree" className="mt-4">
+        {agreements.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Ingen enige forslag fundet.</p>
+        ) : (
+          <SagList sager={agreements} partyAInfo={partyAInfo} partyBInfo={partyBInfo} />
+        )}
+        {loadMoreButton}
+      </TabsContent>
+    </Tabs>
+  )
+}
+
+type SagListProps = {
+  readonly sager: readonly ComparedSag[]
+  readonly partyAInfo: { abbreviation: string; color: string }
+  readonly partyBInfo: { abbreviation: string; color: string }
+}
+
+function SagList({ sager, partyAInfo, partyBInfo }: SagListProps) {
+  return (
+    <div className="space-y-3">
+      {sager.map((sag, i) => (
+        <div
+          key={sag.sagNumber}
+          className="animate-fade-up"
+          style={{ animationDelay: `${Math.min(i * 50, 400)}ms` }}
         >
-          {loading ? "Henter flere forslag…" : "Hent flere forslag"}
-        </button>
-      )}
+          <SagCard sag={sag} partyAInfo={partyAInfo} partyBInfo={partyBInfo} />
+        </div>
+      ))}
     </div>
   )
 }
@@ -138,8 +149,28 @@ type SagCardProps = {
 
 function SagCard({ sag, partyAInfo, partyBInfo }: SagCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const [documents, setDocuments] = useState<SagDocument[] | null>(null)
+  const [docsLoading, setDocsLoading] = useState(false)
   const primaryVote = sag.votes[0]
   const hasMultipleVotes = sag.votes.length > 1
+  const hasExpandableContent = hasMultipleVotes || sag.sagId != null
+
+  const handleExpand = useCallback(async () => {
+    const willExpand = !expanded
+    setExpanded(willExpand)
+
+    if (willExpand && documents === null && sag.sagId != null) {
+      setDocsLoading(true)
+      try {
+        const response = await fetch(`/api/sag/documents?sagId=${sag.sagId}`)
+        if (response.ok) {
+          setDocuments(await response.json())
+        }
+      } finally {
+        setDocsLoading(false)
+      }
+    }
+  }, [expanded, documents, sag.sagId])
 
   return (
     <article className="rounded-xl border border-border bg-card shadow-card transition-all duration-200 hover:shadow-card-hover">
@@ -183,31 +214,63 @@ function SagCard({ sag, partyAInfo, partyBInfo }: SagCardProps) {
         </div>
       </Link>
 
-      {/* Expandable sub-votes */}
-      {hasMultipleVotes && (
+      {/* Expandable details: sub-votes + documents */}
+      {hasExpandableContent && (
         <div className="border-t border-border/50">
           <button
             type="button"
-            onClick={() => setExpanded((prev) => !prev)}
+            onClick={handleExpand}
             className="flex w-full items-center gap-1.5 px-4 py-2 text-xs text-muted-foreground transition-colors hover:text-foreground sm:px-5"
           >
             <ChevronDown
               className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
             />
-            {sag.votes.length} afstemninger på dette forslag
+            {hasMultipleVotes
+              ? `${sag.votes.length} afstemninger og dokumenter`
+              : "Dokumenter"}
           </button>
 
           {expanded && (
-            <div className="px-4 pb-3 sm:px-5">
-              <div className="space-y-2">
-                {sag.votes.map((item) => (
-                  <SubVoteRow
-                    key={item.vote.id}
-                    item={item}
-                    partyAInfo={partyAInfo}
-                    partyBInfo={partyBInfo}
-                  />
-                ))}
+            <div className="px-4 pb-3 sm:px-5 space-y-3">
+              {/* Sub-votes */}
+              {hasMultipleVotes && (
+                <div className="space-y-2">
+                  <h4 className="text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground">
+                    Afstemninger
+                  </h4>
+                  {sag.votes.map((item) => (
+                    <SubVoteRow
+                      key={item.vote.id}
+                      item={item}
+                      partyAInfo={partyAInfo}
+                      partyBInfo={partyBInfo}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Documents */}
+              <div>
+                <h4 className="text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground mb-2">
+                  Dokumenter
+                </h4>
+                {docsLoading && (
+                  <p className="text-xs text-muted-foreground animate-pulse">
+                    Henter dokumenter…
+                  </p>
+                )}
+                {documents !== null && documents.length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Ingen dokumenter fundet.
+                  </p>
+                )}
+                {documents !== null && documents.length > 0 && (
+                  <div className="space-y-1.5">
+                    {documents.map((doc, i) => (
+                      <DocumentRow key={i} doc={doc} />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -265,6 +328,60 @@ function SubVoteRow({ item, partyAInfo, partyBInfo }: SubVoteRowProps) {
       </div>
       <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-transform duration-200 group-hover/sub:translate-x-0.5" />
     </Link>
+  )
+}
+
+type DocumentRowProps = {
+  readonly doc: SagDocument
+}
+
+function DocumentRow({ doc }: DocumentRowProps) {
+  const date = doc.date
+    ? new Date(doc.date).toLocaleDateString("da-DK", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : null
+
+  if (doc.fileUrl) {
+    return (
+      <a
+        href={doc.fileUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group/doc flex items-start gap-2 rounded-lg border border-border/50 bg-muted/30 px-3 py-2 transition-colors hover:bg-muted/60"
+      >
+        <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <div className="min-w-0 flex-1">
+          <span className="text-xs font-medium text-foreground line-clamp-2">
+            {doc.title}
+          </span>
+          {date && (
+            <span className="mt-0.5 block text-[11px] text-muted-foreground tabular-nums font-mono">
+              {date}
+            </span>
+          )}
+        </div>
+        <ExternalLink className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground/40 group-hover/doc:text-muted-foreground" />
+      </a>
+    )
+  }
+
+  return (
+    <div className="flex items-start gap-2 rounded-lg border border-border/50 bg-muted/30 px-3 py-2">
+      <FileText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      <div className="min-w-0 flex-1">
+        <span className="text-xs text-foreground line-clamp-2">
+          {doc.title}
+        </span>
+        {date && (
+          <span className="mt-0.5 block text-[11px] text-muted-foreground tabular-nums font-mono">
+            {date}
+          </span>
+        )}
+      </div>
+    </div>
   )
 }
 
