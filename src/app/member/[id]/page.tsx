@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, User } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { fetchMember, fetchMemberVotes } from "@/lib/oda/fetch-members"
 import { getPartyInfo } from "@/lib/parties"
 import type { MemberVoteRecord } from "@/lib/oda/fetch-members"
+import { MemberAvatar } from "@/components/member-avatar"
 
 export const revalidate = 10800
 
@@ -61,17 +62,7 @@ export default async function MemberPage({ params }: { params: Promise<{ id: str
       {/* Hero card */}
       <header className="animate-fade-up mb-8 rounded-xl border border-border bg-card p-6 shadow-elevated">
         <div className="flex items-start gap-4">
-          {profile.photoUrl ? (
-            <img
-              src={profile.photoUrl}
-              alt={profile.name}
-              className="h-20 w-20 rounded-full object-cover ring-2 ring-border"
-            />
-          ) : (
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted ring-2 ring-border">
-              <User className="h-8 w-8 text-muted-foreground" />
-            </div>
-          )}
+          <MemberAvatar src={profile.photoUrl} alt={profile.name} size="lg" />
           <div className="min-w-0 flex-1">
             <h1 className="font-heading text-xl font-semibold tracking-[-0.02em] sm:text-2xl">
               {profile.name}

@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Loader2, User } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import { MemberAvatar } from "@/components/member-avatar"
 
 type LoyaltyMember = {
   readonly id: number
@@ -90,17 +91,7 @@ export function PartyLoyalty({ partyAbbr }: Props) {
           className="group block"
         >
           <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5">
-            {member.photoUrl ? (
-              <img
-                src={member.photoUrl}
-                alt={member.name}
-                className="h-9 w-9 rounded-full object-cover ring-1 ring-border"
-              />
-            ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted ring-1 ring-border">
-                <User className="h-4 w-4 text-muted-foreground" />
-              </div>
-            )}
+            <MemberAvatar src={member.photoUrl} alt={member.name} size="sm" />
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-medium leading-snug truncate group-hover:text-dannebrog transition-colors duration-200">

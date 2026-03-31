@@ -2,10 +2,11 @@
 
 import { useState, useCallback, useRef } from "react"
 import Link from "next/link"
-import { Search, Loader2, User } from "lucide-react"
+import { Search, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import type { MemberProfile } from "@/lib/oda/fetch-members"
 import { getPartyInfo } from "@/lib/parties"
+import { MemberAvatar } from "@/components/member-avatar"
 
 export function MemberSearch() {
   const [query, setQuery] = useState("")
@@ -85,17 +86,7 @@ export function MemberSearch() {
               style={{ animationDelay: `${Math.min(i * 50, 300)}ms` }}
             >
               <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 shadow-card transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5">
-                {member.photoUrl ? (
-                  <img
-                    src={member.photoUrl}
-                    alt={member.name}
-                    className="h-10 w-10 rounded-full object-cover ring-1 ring-border"
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted ring-1 ring-border">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                )}
+                <MemberAvatar src={member.photoUrl} alt={member.name} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium leading-snug group-hover:text-dannebrog transition-colors duration-200">
                     {member.name}
