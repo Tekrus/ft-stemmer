@@ -17,6 +17,7 @@ export type OdaSagstrin = {
   readonly dato: string
   readonly sagid: number
   readonly typeid: number
+  readonly folketingstidendeurl: string | null
   readonly statusid: number
   readonly opdateringsdato: string
 }

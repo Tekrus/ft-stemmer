@@ -13,6 +13,7 @@ export type VoteSummary = {
   readonly lawDate: string | null
   readonly ftUrl: string | null
   readonly retsinformationUrl: string | null
+  readonly debateUrl: string | null
   readonly partyVotes: readonly PartyVote[]
   readonly totals: VoteTotals
 }

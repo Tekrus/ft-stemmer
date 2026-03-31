@@ -103,6 +103,7 @@ export function mapToVoteSummary(
     lawDate: sag?.lovnummerdato ?? null,
     ftUrl: sag ? buildFtUrl(sag, periodeKode) : null,
     retsinformationUrl: sag ? buildRetsinformationUrl(sag) : null,
+    debateUrl: sagstrin?.folketingstidendeurl ?? null,
     partyVotes,
     totals,
   }
